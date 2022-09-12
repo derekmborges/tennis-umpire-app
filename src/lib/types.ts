@@ -1,5 +1,12 @@
+export enum MatchType {
+    MENS_SINGLE,
+    MENS_DOUBLE,
+    WOMENS_SINGLE,
+    WOMENS_DOUBLE,
+    MIXED_DOUBLE
+}
+
 export enum MatchStatus {
-    CLOSED,
     CREATING,
     IN_PROGRESS,
     COMPLETE

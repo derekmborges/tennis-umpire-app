@@ -1,6 +1,7 @@
 import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
 import React from 'react';
-import { MatchManager } from './components/MatchManager';
+import { ManagerApp } from './components/ManagerApp';
+import { MatchManagerProvider } from './providers/matchManager';
 
 const darkTheme = createTheme({
   palette: {
@@ -12,7 +13,9 @@ function App() {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <MatchManager />
+      <MatchManagerProvider>
+        <ManagerApp />
+      </MatchManagerProvider>
     </ThemeProvider>
   );
 }

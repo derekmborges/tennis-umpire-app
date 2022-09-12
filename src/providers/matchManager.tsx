@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { MatchStatus, Player, Set } from "../lib/types";
 
 interface MatchManagerContextT {
@@ -7,9 +7,11 @@ interface MatchManagerContextT {
     player2: Player | null
     inProgressSet: Set | null
     completedSets: Set[] | null
-    handleNewGame: () => void
-    handleInitGame: (player1: Player, player2: Player) => void
-    handleStartGame: () => void
+    matchTimerLabel: string | null
+    handleNewMatch: () => void
+    handleInitMatch: (player1: Player, player2: Player) => void
+    handleStartMatch: () => void
+    handleEndMatch: () => void
 }
 
 export const MatchManagerContext = createContext<MatchManagerContextT>(null!)
@@ -24,15 +26,27 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
     const [player2, setPlayer2] = useState<Player | null>(null);
     const [inProgressSet, setInProgressSet] = useState<Set | null>(null);
     const [completedSets, setCompletedSets] = useState<Set[] | null>(null);
+    
+    // Match Timer
+    const [minutesPlayed, setMinutesPlayed] = useState<number>(0);
+    const [matchTimerInterval, setMatchTimerInterval] = useState<NodeJS.Timer | null>(null);
+    const [matchTimerLabel, setMatchTimerLabel] = useState<string | null>(null);
+    useEffect(() => {
+        if (matchTimerInterval) {
+            console.log('timer updated:', minutesPlayed)
+            setMatchTimerLabel(`0:${minutesPlayed.toString().padStart(2, '0')}`)
+        }
+    }, [minutesPlayed, matchTimerInterval])
 
-    const handleNewGame = () => {
+    const handleNewMatch = () => {
         setMatchStatus(MatchStatus.CREATING)
     }
 
-    const handleInitGame = (player1: Player, player2: Player) => {
+    const handleInitMatch = (player1: Player, player2: Player) => {
         setPlayer1(player1)
         setPlayer2(player2)
         setCompletedSets([])
+        setMinutesPlayed(0);
         
         const newSet: Set = {
             player1GamesWon: 0,
@@ -41,8 +55,20 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         setInProgressSet(newSet)
     }
 
-    const handleStartGame = () => {
+    const handleStartMatch = () => {
         setMatchStatus(MatchStatus.IN_PROGRESS)
+
+        // Start timer
+        const interval = setInterval(() => setMinutesPlayed(minutesPlayed+1), 60000)
+        setMatchTimerInterval(interval)
+    }
+
+    const handleEndMatch = () => {
+        // Stop timer
+        if (matchTimerInterval) {
+            clearInterval(matchTimerInterval)
+            setMatchTimerInterval(null)
+        }
     }
 
     const contextValue: MatchManagerContextT = {
@@ -51,9 +77,11 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         player2,
         inProgressSet,
         completedSets,
-        handleNewGame,
-        handleInitGame,
-        handleStartGame
+        matchTimerLabel,
+        handleNewMatch,
+        handleInitMatch,
+        handleStartMatch,
+        handleEndMatch
     }
 
     return (
