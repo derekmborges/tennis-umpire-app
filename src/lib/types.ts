@@ -1,26 +1,18 @@
 export enum MatchType {
-    MENS_SINGLE,
-    MENS_DOUBLE,
-    WOMENS_SINGLE,
-    WOMENS_DOUBLE,
-    MIXED_DOUBLE
+    MENS_SINGLE = "Men's Single",
+    WOMENS_SINGLE = "Women's Single",
 }
 
 export enum MatchStatus {
     CREATING,
+    PENDING_START,
     IN_PROGRESS,
     COMPLETE
-}
-
-export enum PlayerGender {
-    MALE,
-    FEMALE
 }
 
 export interface Player {
     name: string
     country: string
-    gender: PlayerGender
     rank?: number
 }
 

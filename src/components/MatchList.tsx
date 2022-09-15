@@ -1,9 +1,16 @@
 import { Button, Typography } from '@mui/material'
-import React from 'react'
+import React, { useState } from 'react'
+import { MatchType } from '../lib/types';
 import { useMatchManager } from '../providers/matchManager'
+import { MatchTypeSelect } from './MatchTypeSelect';
 
 export const MatchList = () => {
+    const [selectingType, setSelectingType] = useState<boolean>(false);
     const { handleNewMatch } = useMatchManager()
+
+    const newMatch = (type: MatchType) => {
+        handleNewMatch(type)
+    }
 
     return (
         <>
@@ -15,10 +22,17 @@ export const MatchList = () => {
                 size='large'
                 variant='contained'
                 color='secondary'
-                onClick={handleNewMatch}
+                onClick={() => setSelectingType(true)}
             >
                 Create Match
             </Button>
+
+            {selectingType && (
+                <MatchTypeSelect
+                    onCancel={() => setSelectingType(false)}
+                    onOk={newMatch}
+                />
+            )}
         </>
     )
 }

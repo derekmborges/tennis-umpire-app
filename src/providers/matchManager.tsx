@@ -1,14 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { MatchStatus, Player, Set } from "../lib/types";
+import { MatchStatus, MatchType, Player, Set } from "../lib/types";
 
 interface MatchManagerContextT {
     matchStatus: MatchStatus | null
+    matchType: MatchType | null
     player1: Player | null
     player2: Player | null
     inProgressSet: Set | null
     completedSets: Set[] | null
     matchTimerLabel: string | null
-    handleNewMatch: () => void
+    handleNewMatch: (type: MatchType) => void
     handleInitMatch: (player1: Player, player2: Player) => void
     handleStartMatch: () => void
     handleEndMatch: () => void
@@ -22,6 +23,7 @@ export interface ProviderProps {
 
 export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
     const [matchStatus, setMatchStatus] = useState<MatchStatus | null>(null);
+    const [matchType, setMatchType] = useState<MatchType | null>(null);
     const [player1, setPlayer1] = useState<Player | null>(null);
     const [player2, setPlayer2] = useState<Player | null>(null);
     const [inProgressSet, setInProgressSet] = useState<Set | null>(null);
@@ -38,7 +40,8 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         }
     }, [minutesPlayed, matchTimerInterval])
 
-    const handleNewMatch = () => {
+    const handleNewMatch = (type: MatchType) => {
+        setMatchType(type)
         setMatchStatus(MatchStatus.CREATING)
     }
 
@@ -53,6 +56,7 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
             player2GamesWon: 0
         }
         setInProgressSet(newSet)
+        setMatchStatus(MatchStatus.PENDING_START)
     }
 
     const handleStartMatch = () => {
@@ -73,6 +77,7 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
 
     const contextValue: MatchManagerContextT = {
         matchStatus,
+        matchType,
         player1,
         player2,
         inProgressSet,
