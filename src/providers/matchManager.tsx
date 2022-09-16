@@ -36,7 +36,7 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
     useEffect(() => {
         if (matchTimerInterval) {
             console.log('timer updated:', minutesPlayed)
-            setMatchTimerLabel(`0:${minutesPlayed.toString().padStart(2, '0')}`)
+            setMatchTimerLabel(`00:${minutesPlayed.toString().padStart(2, '0')}`)
         }
     }, [minutesPlayed, matchTimerInterval])
 
@@ -50,6 +50,7 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         setPlayer2(player2)
         setCompletedSets([])
         setMinutesPlayed(0);
+        setMatchTimerLabel('00:00')
         
         const newSet: Set = {
             currentGame: {
