@@ -52,8 +52,12 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         setMinutesPlayed(0);
         
         const newSet: Set = {
-            player1GamesWon: 0,
-            player2GamesWon: 0
+            currentGame: {
+                server: player1,
+                player1Score: 0,
+                player2Score: 0
+            },
+            completedGames: []
         }
         setInProgressSet(newSet)
         setMatchStatus(MatchStatus.PENDING_START)

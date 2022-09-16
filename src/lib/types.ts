@@ -17,13 +17,20 @@ export interface Player {
 }
 
 export interface Game {
+    server: Player
     player1Score: number
     player2Score: number
     winner?: Player
 }
 
+export interface Tiebreak {
+    player1Score: number
+    player2Score: number
+}
+
 export interface Set {
-    player1GamesWon: number
-    player2GamesWon: number
+    currentGame: Game
+    completedGames: Game[]
+    tiebreak?: Tiebreak
     winner?: Player
 }
