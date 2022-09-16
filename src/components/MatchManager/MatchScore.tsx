@@ -29,7 +29,7 @@ export const MatchScore = () => {
     return (
         <Stack direction='column' spacing={0.1} width='100%' alignItems='center'>
 
-            <Stack direction='row' width='100%'>
+            <Stack direction='row' width='100%' justifyContent='center'>
                 <Box
                     bgcolor='primary.dark' width='25%'
                     display='flex' alignItems='center' justifyContent='center'
@@ -46,7 +46,7 @@ export const MatchScore = () => {
                         <ArrowLeftIcon fontSize='large' />
                     )}
                 </Box>
-                <Box bgcolor='secondary.main' width='8%' minWidth={50}
+                <Box bgcolor='secondary.main' width='7%' minWidth={50}
                     display='flex' alignItems='center' justifyContent='center'
                 >
                     <Typography textAlign='center' fontSize={18} fontWeight={600}>
@@ -73,7 +73,7 @@ export const MatchScore = () => {
                     </Box>
                 ))}
             </Stack>
-            <Stack direction='row' width='100%'>
+            <Stack direction='row' width='100%' justifyContent='center'>
                 <Box
                     bgcolor='primary.dark' width='25%'
                     display='flex' alignItems='center' justifyContent='center'
@@ -90,7 +90,7 @@ export const MatchScore = () => {
                         <ArrowLeftIcon fontSize='large' />
                     )}
                 </Box>
-                <Box bgcolor='secondary.main' width='8%' minWidth={50}
+                <Box bgcolor='secondary.main' width='7%' minWidth={50}
                     display='flex' alignItems='center' justifyContent='center'
                 >
                     <Typography textAlign='center' fontSize={18} fontWeight={600}>
