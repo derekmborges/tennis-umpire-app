@@ -28,7 +28,8 @@ export const MatchManager = () => {
 
       {matchStatus === MatchStatus.IN_PROGRESS ? (
         <>
-          <Typography variant="h6" mt={2} p={2}>
+          <Typography variant="h6" textAlign='center'
+            mt={2} p={2}>
             Point Results
           </Typography>
 

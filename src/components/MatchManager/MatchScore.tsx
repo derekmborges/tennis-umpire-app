@@ -1,8 +1,15 @@
 import { Box, Stack, Typography } from '@mui/material'
 import React from 'react'
-import { Player, Set } from '../../lib/types'
+import { GameScore, Player, Set } from '../../lib/types'
 import { useMatchManager } from '../../providers/matchManager'
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft'
+
+const gameScoreMap = new Map<number, string>([
+    [GameScore.ZERO, '0'],
+    [GameScore.FIFTEEN, '15'],
+    [GameScore.THIRTY, '30'],
+    [GameScore.FOURTY, '40'],
+])
 
 export const MatchScore = () => {
     const {
@@ -11,9 +18,32 @@ export const MatchScore = () => {
         inProgressSet,
         completedSets
     } = useMatchManager()
+    if (!player1 || !player2 || !inProgressSet || !completedSets) return null
+
+    const gameScoreLabels = (): string[] => {
+        const player1Score = inProgressSet.currentGame.player1Score
+        const player2Score = inProgressSet.currentGame.player2Score
+        
+        // Regular scores
+        const regularScore1 = gameScoreMap.get(player1Score)
+        const regularScore2 = gameScoreMap.get(player2Score)
+        if (regularScore1 && regularScore2) {
+            return [regularScore1, regularScore2]
+        }
+
+        // Deuce scores
+        if (player1Score === player2Score) {
+            return ['40', '40']
+        } else {
+            return player1Score > player2Score
+                ? ['ADV', '']
+                : ['', 'ADV']
+        }
+    }
+    const scoreLabels = gameScoreLabels()
 
     const getCurrentSetScore = (player: Player): number => {
-        return inProgressSet?.completedGames
+        return inProgressSet.completedGames
             .filter(g => g.winner?.name === player.name)
             .length || 0
     }
@@ -23,8 +53,6 @@ export const MatchScore = () => {
             .filter(g => g.winner?.name === player.name)
             .length
     }
-
-    if (!player1 || !player2 || !inProgressSet || !completedSets) return null
 
     return (
         <Stack direction='column' spacing={0.1} width='100%' alignItems='center'>
@@ -43,14 +71,14 @@ export const MatchScore = () => {
                     display='flex' alignItems='center' justifyContent='start'
                 >
                     { inProgressSet.currentGame.server.name === player1.name && (
-                        <ArrowLeftIcon fontSize='large' />
+                        <ArrowLeftIcon fontSize='medium' />
                     )}
                 </Box>
                 <Box bgcolor='secondary.main' width='7%' minWidth={50}
                     display='flex' alignItems='center' justifyContent='center'
                 >
                     <Typography textAlign='center' fontSize={18} fontWeight={600}>
-                        {inProgressSet.currentGame.player1Score}
+                        {scoreLabels[0]}
                     </Typography>
                 </Box>
                 <Box bgcolor='primary.light' width='6%' minWidth={40}
@@ -60,12 +88,15 @@ export const MatchScore = () => {
                         {getCurrentSetScore(player1)}
                     </Typography>
                 </Box>
-                {completedSets.map(set => (
-                    <Box bgcolor='primary.light' width={'6%'} minWidth={40}
+                {completedSets.map((set, i) => (
+                    <Box key={i}
+                        bgcolor='primary.light' width={'6%'} minWidth={40}
                         display='flex' alignItems='center' justifyContent='center'
+                        borderLeft='1px solid' borderColor='rgba(0, 0, 0, 0.1)'
                     >
                         <Typography textAlign='center'
                             color='ButtonText'
+                            fontSize={18} fontWeight={600}
                             sx={set.winner?.name !== player1.name ? {opacity: 0.4} : {}}
                         >
                             {getCompletedSetScore(set, player1)}
@@ -87,14 +118,14 @@ export const MatchScore = () => {
                     display='flex' alignItems='center' justifyContent='start'
                 >
                     { inProgressSet.currentGame.server.name === player2.name && (
-                        <ArrowLeftIcon fontSize='large' />
+                        <ArrowLeftIcon fontSize='medium' />
                     )}
                 </Box>
                 <Box bgcolor='secondary.main' width='7%' minWidth={50}
                     display='flex' alignItems='center' justifyContent='center'
                 >
                     <Typography textAlign='center' fontSize={18} fontWeight={600}>
-                        {inProgressSet.currentGame.player2Score}
+                        {scoreLabels[1]}
                     </Typography>
                 </Box>
                 <Box bgcolor='primary.light' width='6%' minWidth={40}
@@ -104,12 +135,15 @@ export const MatchScore = () => {
                         {getCurrentSetScore(player2)}
                     </Typography>
                 </Box>
-                {completedSets.map(set => (
-                    <Box bgcolor='primary.light' width={'6%'} minWidth={40}
+                {completedSets.map((set, i) => (
+                    <Box key={i}
+                        bgcolor='primary.light' width={'6%'} minWidth={40}
                         display='flex' alignItems='center' justifyContent='center'
+                        borderLeft='1px solid' borderColor='rgba(0, 0, 0, 0.1)'
                     >
                         <Typography textAlign='center'
                             color='ButtonText'
+                            fontSize={18} fontWeight={600}
                             sx={set.winner?.name !== player2.name ? {opacity: 0.4} : {}}
                         >
                             {getCompletedSetScore(set, player2)}

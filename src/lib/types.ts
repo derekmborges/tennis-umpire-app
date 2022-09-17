@@ -23,6 +23,13 @@ export interface Game {
     winner?: Player
 }
 
+export enum GameScore {
+    ZERO = 0,
+    FIFTEEN = 1,
+    THIRTY = 2,
+    FOURTY = 3
+}
+
 export interface Tiebreak {
     player1Score: number
     player2Score: number
