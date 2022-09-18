@@ -3,6 +3,11 @@ export enum MatchType {
     WOMENS_SINGLE = "Women's Single",
 }
 
+export const matchTypeWinningSetCount = new Map<MatchType, number>([
+    [MatchType.MENS_SINGLE, 3],
+    [MatchType.WOMENS_SINGLE, 2]
+])
+
 export enum MatchStatus {
     CREATING,
     PENDING_START,

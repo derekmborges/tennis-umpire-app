@@ -1,6 +1,6 @@
 import { Box, Stack, Typography } from '@mui/material'
 import React from 'react'
-import { GameScore, Player, Set } from '../../lib/types'
+import { GameScore, MatchStatus, Player, Set } from '../../lib/types'
 import { useMatchManager } from '../../providers/matchManager'
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft'
 
@@ -16,14 +16,15 @@ export const MatchScore = () => {
         player1,
         player2,
         inProgressSet,
-        completedSets
+        completedSets,
+        matchStatus
     } = useMatchManager()
     if (!player1 || !player2 || !inProgressSet || !completedSets) return null
 
     const gameScoreLabels = (): string[] => {
         const player1Score = inProgressSet.currentGame.player1Score
         const player2Score = inProgressSet.currentGame.player2Score
-        
+
         // Regular scores
         const regularScore1 = gameScoreMap.get(player1Score)
         const regularScore2 = gameScoreMap.get(player2Score)
@@ -70,24 +71,29 @@ export const MatchScore = () => {
                     bgcolor='primary.dark' width='3%'
                     display='flex' alignItems='center' justifyContent='start'
                 >
-                    { inProgressSet.currentGame.server.name === player1.name && (
-                        <ArrowLeftIcon fontSize='medium' />
-                    )}
+                    {matchStatus === MatchStatus.IN_PROGRESS
+                        && inProgressSet.currentGame.server.name === player1.name && (
+                            <ArrowLeftIcon fontSize='medium' />
+                        )}
                 </Box>
-                <Box bgcolor='secondary.main' width='7%' minWidth={50}
-                    display='flex' alignItems='center' justifyContent='center'
-                >
-                    <Typography textAlign='center' fontSize={18} fontWeight={600}>
-                        {scoreLabels[0]}
-                    </Typography>
-                </Box>
-                <Box bgcolor='primary.light' width='6%' minWidth={40}
-                    display='flex' alignItems='center' justifyContent='center'
-                >
-                    <Typography textAlign='center' color='ButtonText' fontSize={18} fontWeight={600}>
-                        {getCurrentSetScore(player1)}
-                    </Typography>
-                </Box>
+                {matchStatus === MatchStatus.IN_PROGRESS && (
+                    <>
+                        <Box bgcolor='secondary.main' width='7%' minWidth={50}
+                            display='flex' alignItems='center' justifyContent='center'
+                        >
+                            <Typography textAlign='center' fontSize={18} fontWeight={600}>
+                                {scoreLabels[0]}
+                            </Typography>
+                        </Box>
+                        <Box bgcolor='primary.light' width='6%' minWidth={40}
+                            display='flex' alignItems='center' justifyContent='center'
+                        >
+                            <Typography textAlign='center' color='ButtonText' fontSize={18} fontWeight={600}>
+                                {getCurrentSetScore(player1)}
+                            </Typography>
+                        </Box>
+                    </>
+                )}
                 {completedSets.map((set, i) => (
                     <Box key={i}
                         bgcolor='primary.light' width={'6%'} minWidth={40}
@@ -97,7 +103,7 @@ export const MatchScore = () => {
                         <Typography textAlign='center'
                             color='ButtonText'
                             fontSize={18} fontWeight={600}
-                            sx={set.winner?.name !== player1.name ? {opacity: 0.4} : {}}
+                            sx={set.winner?.name !== player1.name ? { opacity: 0.4 } : {}}
                         >
                             {getCompletedSetScore(set, player1)}
                         </Typography>
@@ -117,24 +123,29 @@ export const MatchScore = () => {
                     bgcolor='primary.dark' width='3%'
                     display='flex' alignItems='center' justifyContent='start'
                 >
-                    { inProgressSet.currentGame.server.name === player2.name && (
+                    {matchStatus === MatchStatus.IN_PROGRESS
+                        && inProgressSet.currentGame.server.name === player2.name && (
                         <ArrowLeftIcon fontSize='medium' />
                     )}
                 </Box>
-                <Box bgcolor='secondary.main' width='7%' minWidth={50}
-                    display='flex' alignItems='center' justifyContent='center'
-                >
-                    <Typography textAlign='center' fontSize={18} fontWeight={600}>
-                        {scoreLabels[1]}
-                    </Typography>
-                </Box>
-                <Box bgcolor='primary.light' width='6%' minWidth={40}
-                    display='flex' alignItems='center' justifyContent='center'
-                >
-                    <Typography textAlign='center' color='ButtonText' fontSize={18} fontWeight={600}>
-                        {getCurrentSetScore(player2)}
-                    </Typography>
-                </Box>
+                {matchStatus === MatchStatus.IN_PROGRESS && (
+                    <>
+                        <Box bgcolor='secondary.main' width='7%' minWidth={50}
+                            display='flex' alignItems='center' justifyContent='center'
+                        >
+                            <Typography textAlign='center' fontSize={18} fontWeight={600}>
+                                {scoreLabels[1]}
+                            </Typography>
+                        </Box>
+                        <Box bgcolor='primary.light' width='6%' minWidth={40}
+                            display='flex' alignItems='center' justifyContent='center'
+                        >
+                            <Typography textAlign='center' color='ButtonText' fontSize={18} fontWeight={600}>
+                                {getCurrentSetScore(player2)}
+                            </Typography>
+                        </Box>
+                    </>
+                )}
                 {completedSets.map((set, i) => (
                     <Box key={i}
                         bgcolor='primary.light' width={'6%'} minWidth={40}
@@ -144,7 +155,7 @@ export const MatchScore = () => {
                         <Typography textAlign='center'
                             color='ButtonText'
                             fontSize={18} fontWeight={600}
-                            sx={set.winner?.name !== player2.name ? {opacity: 0.4} : {}}
+                            sx={set.winner?.name !== player2.name ? { opacity: 0.4 } : {}}
                         >
                             {getCompletedSetScore(set, player2)}
                         </Typography>
