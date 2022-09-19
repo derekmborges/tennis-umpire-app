@@ -51,23 +51,21 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         setMatchStatus(MatchStatus.CREATING)
     }
 
-    const createNewSet = (lastSet?: Set) => {
-        if (player1 && player2) {
-            const lastGame = lastSet?.completedGames[lastSet.completedGames.length-1]
-            const server = lastGame
-                ? lastGame.server.name === player1.name ? player2 : player1
-                : player1
+    const createNewSet = (player1: Player, player2: Player, lastSet?: Set) => {
+        const lastGame = lastSet?.completedGames[lastSet.completedGames.length - 1]
+        const server = lastGame
+            ? lastGame.server.name === player1.name ? player2 : player1
+            : player1
 
-            const newSet: Set = {
-                currentGame: {
-                    server,
-                    player1Score: 0,
-                    player2Score: 0
-                },
-                completedGames: []
-            }
-            setInProgressSet(newSet)
+        const newSet: Set = {
+            currentGame: {
+                server,
+                player1Score: 0,
+                player2Score: 0
+            },
+            completedGames: []
         }
+        setInProgressSet(newSet)
     }
 
     const handleInitMatch = (player1: Player, player2: Player) => {
@@ -77,7 +75,7 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         setMinutesPlayed(0);
         setMatchTimerLabel('00:00')
 
-        createNewSet()
+        createNewSet(player1, player2)
         setMatchStatus(MatchStatus.PENDING_START)
     }
 
@@ -102,7 +100,7 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
                 handleEndMatch()
             }
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [matchType, completedSets])
 
     const handlePoint = (toPlayer: Player) => {
@@ -122,9 +120,9 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
 
             if (updatedSet.winner && completedSets) {
                 setCompletedSets([...completedSets, updatedSet])
-                createNewSet(updatedSet)
+                createNewSet(player1, player2, updatedSet)
             } else {
-                setInProgressSet({...updatedSet})
+                setInProgressSet({ ...updatedSet })
             }
         }
     }
