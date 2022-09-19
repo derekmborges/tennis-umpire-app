@@ -119,7 +119,6 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         if (inProgressSet && player1 && player2) {
             const player1Games = inProgressSet.completedGames.filter(g => g.winner?.name === player1.name).length
             const player2Games = inProgressSet.completedGames.filter(g => g.winner?.name === player2.name).length
-            console.log('checking for tiebreak: ', player1Games, player2Games)
             if (player1Games === 6 && player2Games === 6) {
                 return {
                     ...set,
@@ -138,7 +137,6 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
             if (!set.tiebreak) {
                 const player1Games = set.completedGames.filter(g => g.winner?.name === player1.name).length
                 const player2Games = set.completedGames.filter(g => g.winner?.name === player2.name).length
-                console.log('checking for set win:', player1Games, 'to', player2Games)
                 if ((player1Games >= 6 && (player1Games - player2Games) >= 2)) {
                     return {
                         ...set,
@@ -160,7 +158,6 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         if (player1 && player2 && setsRequired) {
             const player1Sets = completedSets.filter(s => s.winner?.name === player1.name).length
             const player2Sets = completedSets.filter(s => s.winner?.name === player2.name).length
-            console.log('checking for match win:', player1Sets, 'to', player2Sets)
             if (player1Sets === setsRequired) {
                 setMatchWinner(player1)
                 setMatchStatus(MatchStatus.COMPLETE)

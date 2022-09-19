@@ -71,12 +71,12 @@ export const MatchScore = () => {
                     bgcolor='primary.dark' width='3%'
                     display='flex' alignItems='center' justifyContent='start'
                 >
-                    {matchStatus === MatchStatus.IN_PROGRESS
+                    {matchStatus !== MatchStatus.COMPLETE
                         && inProgressSet.currentGame.server.name === player1.name && (
                             <ArrowLeftIcon fontSize='medium' />
                         )}
                 </Box>
-                {matchStatus === MatchStatus.IN_PROGRESS && (
+                {matchStatus !== MatchStatus.COMPLETE && (
                     <>
                         <Box bgcolor='secondary.main' width='7%' minWidth={50}
                             display='flex' alignItems='center' justifyContent='center'
@@ -123,12 +123,12 @@ export const MatchScore = () => {
                     bgcolor='primary.dark' width='3%'
                     display='flex' alignItems='center' justifyContent='start'
                 >
-                    {matchStatus === MatchStatus.IN_PROGRESS
+                    {matchStatus !== MatchStatus.COMPLETE
                         && inProgressSet.currentGame.server.name === player2.name && (
                         <ArrowLeftIcon fontSize='medium' />
                     )}
                 </Box>
-                {matchStatus === MatchStatus.IN_PROGRESS && (
+                {matchStatus !== MatchStatus.COMPLETE && (
                     <>
                         <Box bgcolor='secondary.main' width='7%' minWidth={50}
                             display='flex' alignItems='center' justifyContent='center'
