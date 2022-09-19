@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { Game, GameScore, MatchStatus, MatchType, matchTypeWinningSetCount, Player, Set } from "../lib/types";
+import { checkForGameWin, checkForMatchWin, checkForSetWin, checkForTiebreaker } from "../lib/scoring";
+import { MatchStatus, MatchType, Player, Set } from "../lib/types";
 
 interface MatchManagerContextT {
     matchStatus: MatchStatus | null
@@ -50,16 +51,23 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         setMatchStatus(MatchStatus.CREATING)
     }
 
-    const createNewSet = (server: Player) => {
-        const newSet: Set = {
-            currentGame: {
-                server,
-                player1Score: 0,
-                player2Score: 0
-            },
-            completedGames: []
+    const createNewSet = (lastSet?: Set) => {
+        if (player1 && player2) {
+            const lastGame = lastSet?.completedGames[lastSet.completedGames.length-1]
+            const server = lastGame
+                ? lastGame.server.name === player1.name ? player2 : player1
+                : player1
+
+            const newSet: Set = {
+                currentGame: {
+                    server,
+                    player1Score: 0,
+                    player2Score: 0
+                },
+                completedGames: []
+            }
+            setInProgressSet(newSet)
         }
-        setInProgressSet(newSet)
     }
 
     const handleInitMatch = (player1: Player, player2: Player) => {
@@ -69,7 +77,7 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         setMinutesPlayed(0);
         setMatchTimerLabel('00:00')
 
-        createNewSet(player1)
+        createNewSet()
         setMatchStatus(MatchStatus.PENDING_START)
     }
 
@@ -85,94 +93,14 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         setMatchTimerInterval(interval)
     }
 
-    const checkForGameWin = (set: Set): Set => {
-        if (inProgressSet && player1 && player2) {
-            const game = set.currentGame
-            if (game.player1Score > GameScore.FOURTY && (game.player1Score - game.player2Score) >= 2) {
-                game.winner = player1
-            } else if (game.player2Score > GameScore.FOURTY && (game.player2Score - game.player1Score) >= 2) {
-                game.winner = player2
-            }
-
-            if (game.winner) {
-                const newGame: Game = {
-                    server: game.server.name === player1.name ? player2 : player1,
-                    player1Score: 0,
-                    player2Score: 0
-                }
-                return {
-                    ...set,
-                    currentGame: newGame,
-                    completedGames: [...inProgressSet.completedGames, game]
-                }
-            } else {
-                return {
-                    ...set,
-                    currentGame: game
-                }
-            }
-        }
-        return set
-    }
-
-    const checkForTiebreaker = (set: Set): Set => {
-        if (inProgressSet && player1 && player2) {
-            const player1Games = inProgressSet.completedGames.filter(g => g.winner?.name === player1.name).length
-            const player2Games = inProgressSet.completedGames.filter(g => g.winner?.name === player2.name).length
-            if (player1Games === 6 && player2Games === 6) {
-                return {
-                    ...set,
-                    tiebreak: {
-                        player1Score: 0,
-                        player2Score: 0
-                    }
-                }
-            }
-        }
-        return set
-    }
-
-    const checkForSetWin = (set: Set): Set => {
-        if (player1 && player2) {
-            if (!set.tiebreak) {
-                const player1Games = set.completedGames.filter(g => g.winner?.name === player1.name).length
-                const player2Games = set.completedGames.filter(g => g.winner?.name === player2.name).length
-                if ((player1Games >= 6 && (player1Games - player2Games) >= 2)) {
-                    return {
-                        ...set,
-                        winner: player1
-                    }
-                } else if (player2Games >= 6 && (player2Games - player1Games) >= 2) {
-                    return {
-                        ...set,
-                        winner: player2
-                    }
-                }
-            }
-        }
-        return set
-    }
-
-    const checkForMatchWin = (completedSets: Set[], matchType: MatchType) => {
-        const setsRequired = matchTypeWinningSetCount.get(matchType)
-        if (player1 && player2 && setsRequired) {
-            const player1Sets = completedSets.filter(s => s.winner?.name === player1.name).length
-            const player2Sets = completedSets.filter(s => s.winner?.name === player2.name).length
-            if (player1Sets === setsRequired) {
-                setMatchWinner(player1)
-                setMatchStatus(MatchStatus.COMPLETE)
-                handleEndMatch()
-            } else if (player2Sets === setsRequired) {
-                setMatchWinner(player2)
-                setMatchStatus(MatchStatus.COMPLETE)
-                handleEndMatch()
-            }
-        }
-    }
-
     useEffect(() => {
-        if (matchType && completedSets && completedSets.length > 1) {
-            checkForMatchWin(completedSets, matchType)
+        if (matchType && player1 && player2 && completedSets && completedSets.length > 1) {
+            const winner = checkForMatchWin(completedSets, matchType, player1, player2)
+            if (winner) {
+                setMatchWinner(winner)
+                setMatchStatus(MatchStatus.COMPLETE)
+                handleEndMatch()
+            }
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [matchType, completedSets])
@@ -186,15 +114,15 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
                 updatedSet.currentGame.player2Score++
             )
 
-            updatedSet = checkForGameWin(updatedSet)
-            updatedSet = checkForTiebreaker(updatedSet)
+            updatedSet = checkForGameWin(updatedSet, player1, player2)
+            updatedSet = checkForTiebreaker(updatedSet, player1, player2)
             if (!updatedSet.tiebreak) {
-                updatedSet = checkForSetWin(updatedSet)
+                updatedSet = checkForSetWin(updatedSet, player1, player2)
             }
 
             if (updatedSet.winner && completedSets) {
                 setCompletedSets([...completedSets, updatedSet])
-                createNewSet(player1)
+                createNewSet(updatedSet)
             } else {
                 setInProgressSet({...updatedSet})
             }
