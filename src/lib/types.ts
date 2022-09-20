@@ -38,6 +38,7 @@ export enum GameScore {
 export interface Tiebreak {
     player1Score: number
     player2Score: number
+    currentServer: Player
 }
 
 export interface Set {

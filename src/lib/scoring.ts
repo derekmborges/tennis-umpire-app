@@ -28,14 +28,14 @@ export const checkForGameWin = (set: Set, player1: Player, player2: Player): Set
 }
 
 export const checkForTiebreaker = (set: Set, player1: Player, player2: Player): Set => {
-    const player1Games = set.completedGames.filter(g => g.winner?.name === player1.name).length
-    const player2Games = set.completedGames.filter(g => g.winner?.name === player2.name).length
-    if (player1Games === 6 && player2Games === 6) {
+    if (set.completedGames.length === 12) {
+        const lastServer = set.completedGames[11].server
         return {
             ...set,
             tiebreak: {
                 player1Score: 0,
-                player2Score: 0
+                player2Score: 0,
+                currentServer: lastServer.name === player1.name ? player2 : player1
             }
         }
     }
@@ -43,15 +43,32 @@ export const checkForTiebreaker = (set: Set, player1: Player, player2: Player): 
 }
 
 export const checkForSetWin = (set: Set, player1: Player, player2: Player): Set => {
-    if (!set.tiebreak) {
-        const player1Games = set.completedGames.filter(g => g.winner?.name === player1.name).length
-        const player2Games = set.completedGames.filter(g => g.winner?.name === player2.name).length
-        if ((player1Games >= 6 && (player1Games - player2Games) >= 2)) {
+    const player1Games = set.completedGames.filter(g => g.winner?.name === player1.name).length
+    const player2Games = set.completedGames.filter(g => g.winner?.name === player2.name).length
+    if ((player1Games >= 6 && (player1Games - player2Games) >= 2)) {
+        return {
+            ...set,
+            winner: player1
+        }
+    } else if (player2Games >= 6 && (player2Games - player1Games) >= 2) {
+        return {
+            ...set,
+            winner: player2
+        }
+    }
+    return set
+}
+
+export const checkForTiebreakSetWin = (set: Set, player1: Player, player2: Player): Set => {
+    if (set.tiebreak) {
+        const player1Score = set.tiebreak.player1Score
+        const player2Score = set.tiebreak.player2Score
+        if (player1Score >= 7 && (player1Score - player2Score) >= 2) {
             return {
                 ...set,
                 winner: player1
             }
-        } else if (player2Games >= 6 && (player2Games - player1Games) >= 2) {
+        } else if (player2Score >= 7 && (player2Score - player1Score) >= 2) {
             return {
                 ...set,
                 winner: player2

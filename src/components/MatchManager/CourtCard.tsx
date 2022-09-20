@@ -9,14 +9,23 @@ export const CourtCard = () => {
         player2,
         inProgressSet
     } = useMatchManager()
+    if (!player1 || !player2 || !inProgressSet) return null
 
     const getScore = () => {
-        if (inProgressSet && inProgressSet.currentGame) {
+        if (inProgressSet.tiebreak) {
+            return inProgressSet.tiebreak.player1Score + inProgressSet.tiebreak.player2Score
+        } else {
             return inProgressSet.currentGame.player1Score + inProgressSet.currentGame.player2Score
         }
-        return 0
     }
     const scoreSum = getScore()
+
+    const currentServer = inProgressSet.tiebreak
+        ? inProgressSet.tiebreak.currentServer
+        : inProgressSet.currentGame.server
+
+    const serverOffsetL = inProgressSet.tiebreak && scoreSum > 0 ? 0 : 1
+    const serverOffsetR = inProgressSet.tiebreak && scoreSum > 0 ? 1 : 0
 
     return (
         <Box width='100%' height={150} display='flex' alignItems='center' justifyContent='center'>
@@ -32,8 +41,8 @@ export const CourtCard = () => {
                             alignItems: 'center'
                         }}
                     >
-                        { scoreSum % 2 === 1 ?
-                            inProgressSet?.currentGame.server.name === player1?.name ? (
+                        { scoreSum % 2 === serverOffsetL ?
+                            currentServer.name === player1.name ? (
                                 <>
                                     <SportsTennisIcon fontSize='small' />
                                     <Typography
@@ -41,18 +50,18 @@ export const CourtCard = () => {
                                         color='primary.dark'
                                         ml={1}
                                     >
-                                        {player1?.name}
+                                        {player1.name}
                                     </Typography>
                                 </>
                             ) : (
                                 <Typography variant='h6'>
-                                    {player1?.name}
+                                    {player1.name}
                                 </Typography>
                             )
                         : null}
                         <Typography
                             variant='h6'
-                            color={inProgressSet?.currentGame.server.name === player1?.name ? 'primary.dark' : ''}
+                            color={currentServer.name === player1.name ? 'primary.dark' : ''}
                         >
                         </Typography>
                     </Box>
@@ -66,8 +75,8 @@ export const CourtCard = () => {
                             alignItems: 'center'
                         }}
                     >
-                        { scoreSum % 2 === 0 ?
-                            inProgressSet?.currentGame.server.name === player1?.name ? (
+                        { scoreSum % 2 === serverOffsetR ?
+                            currentServer.name === player1.name ? (
                                 <>
                                     <SportsTennisIcon fontSize='small' />
                                     <Typography
@@ -75,12 +84,12 @@ export const CourtCard = () => {
                                         color='primary.dark'
                                         ml={1}
                                     >
-                                        {player1?.name}
+                                        {player1.name}
                                     </Typography>
                                 </>
                             ) : (
                                 <Typography variant='h6'>
-                                    {player1?.name}
+                                    {player1.name}
                                 </Typography>
                             )
                         : null}
@@ -97,8 +106,8 @@ export const CourtCard = () => {
                             alignItems: 'center'
                         }}
                     >
-                        { scoreSum % 2 === 0 ?
-                            inProgressSet?.currentGame.server.name === player2?.name ? (
+                        { scoreSum % 2 === serverOffsetR ?
+                            currentServer.name === player2.name ? (
                                 <>
                                     <SportsTennisIcon fontSize='small' />
                                     <Typography
@@ -106,12 +115,12 @@ export const CourtCard = () => {
                                         color='primary.dark'
                                         ml={1}
                                     >
-                                        {player2?.name}
+                                        {player2.name}
                                     </Typography>
                                 </>
                             ) : (
                                 <Typography variant='h6'>
-                                    {player2?.name}
+                                    {player2.name}
                                 </Typography>
                             )
                         : null}
@@ -126,8 +135,8 @@ export const CourtCard = () => {
                             alignItems: 'center'
                         }}
                     >
-                        { scoreSum % 2 === 1 ?
-                            inProgressSet?.currentGame.server.name === player2?.name ? (
+                        { scoreSum % 2 === serverOffsetL ?
+                            currentServer.name === player2.name ? (
                                 <>
                                     <SportsTennisIcon fontSize='small' />
                                     <Typography

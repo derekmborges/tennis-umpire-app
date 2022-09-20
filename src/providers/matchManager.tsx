@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { checkForGameWin, checkForMatchWin, checkForSetWin, checkForTiebreaker } from "../lib/scoring";
-import { MatchStatus, MatchType, Player, Set } from "../lib/types";
+import { checkForGameWin, checkForMatchWin, checkForSetWin, checkForTiebreaker, checkForTiebreakSetWin } from "../lib/scoring";
+import { Game, MatchStatus, MatchType, Player, Set } from "../lib/types";
 
 interface MatchManagerContextT {
     matchStatus: MatchStatus | null
@@ -106,18 +106,31 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
     const handlePoint = (toPlayer: Player) => {
         if (inProgressSet && player1 && player2) {
             let updatedSet = inProgressSet
-            if (toPlayer.name === player1.name) {
-                updatedSet.currentGame.player1Score++
-            } else (
-                updatedSet.currentGame.player2Score++
-            )
-
-            updatedSet = checkForGameWin(updatedSet, player1, player2)
-            updatedSet = checkForTiebreaker(updatedSet, player1, player2)
             if (!updatedSet.tiebreak) {
+                if (toPlayer.name === player1.name) {
+                    updatedSet.currentGame.player1Score++
+                } else (
+                    updatedSet.currentGame.player2Score++
+                )
+    
+                updatedSet = checkForGameWin(updatedSet, player1, player2)
+                updatedSet = checkForTiebreaker(updatedSet, player1, player2)
                 updatedSet = checkForSetWin(updatedSet, player1, player2)
-            }
+            } else {
+                if (toPlayer.name === player1.name) {
+                    updatedSet.tiebreak.player1Score++
+                } else (
+                    updatedSet.tiebreak.player2Score++
+                )
 
+                // Update server every odd total points
+                const scoreSum = updatedSet.tiebreak.player1Score + updatedSet.tiebreak.player2Score
+                if (scoreSum % 2 === 1) {
+                    updatedSet.tiebreak.currentServer = updatedSet.tiebreak.currentServer.name === player1.name ? player2 : player1
+                }
+
+                updatedSet = checkForTiebreakSetWin(updatedSet, player1, player2)
+            }
             if (updatedSet.winner && completedSets) {
                 setCompletedSets([...completedSets, updatedSet])
                 createNewSet(player1, player2, updatedSet)

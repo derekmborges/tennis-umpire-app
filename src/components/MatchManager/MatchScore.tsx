@@ -22,23 +22,30 @@ export const MatchScore = () => {
     if (!player1 || !player2 || !inProgressSet || !completedSets) return null
 
     const gameScoreLabels = (): string[] => {
-        const player1Score = inProgressSet.currentGame.player1Score
-        const player2Score = inProgressSet.currentGame.player2Score
+        if (!inProgressSet.tiebreak) {
+            const player1Score = inProgressSet.currentGame.player1Score
+            const player2Score = inProgressSet.currentGame.player2Score
 
-        // Regular scores
-        const regularScore1 = gameScoreMap.get(player1Score)
-        const regularScore2 = gameScoreMap.get(player2Score)
-        if (regularScore1 && regularScore2) {
-            return [regularScore1, regularScore2]
-        }
+            // Regular scores
+            const regularScore1 = gameScoreMap.get(player1Score)
+            const regularScore2 = gameScoreMap.get(player2Score)
+            if (regularScore1 && regularScore2) {
+                return [regularScore1, regularScore2]
+            }
 
-        // Deuce scores
-        if (player1Score === player2Score) {
-            return ['40', '40']
+            // Deuce scores
+            if (player1Score === player2Score) {
+                return ['40', '40']
+            } else {
+                return player1Score > player2Score
+                    ? ['ADV', '']
+                    : ['', 'ADV']
+            }
         } else {
-            return player1Score > player2Score
-                ? ['ADV', '']
-                : ['', 'ADV']
+            return [
+                inProgressSet.tiebreak.player1Score.toString(),
+                inProgressSet.tiebreak.player2Score.toString()
+            ]
         }
     }
     const scoreLabels = gameScoreLabels()
@@ -50,13 +57,35 @@ export const MatchScore = () => {
     }
 
     const getCompletedSetScore = (set: Set, player: Player): number => {
-        return set.completedGames
+        const numGames = set.completedGames
             .filter(g => g.winner?.name === player.name)
             .length
+        if (set.tiebreak && set.winner?.name === player.name) {
+            return numGames + 1
+        } else {
+            return numGames
+        }
     }
+
+    const currentServer = inProgressSet.tiebreak
+        ? inProgressSet.tiebreak.currentServer
+        : inProgressSet.currentGame.server
 
     return (
         <Stack direction='column' spacing={0.1} width='100%' alignItems='center'>
+
+            {inProgressSet.tiebreak && (
+                <Stack direction='row' width='100%' justifyContent='center'>
+                    <Box width='22%'></Box>
+                    <Box width='7%' minWidth={50}
+                        display='flex' alignItems='center' justifyContent='center'
+                    >
+                        <Typography textAlign='center' variant='caption'>
+                            Tiebreak
+                        </Typography>
+                    </Box>
+                </Stack>
+            )}
 
             <Stack direction='row' width='100%' justifyContent='center'>
                 <Box
@@ -72,7 +101,7 @@ export const MatchScore = () => {
                     display='flex' alignItems='center' justifyContent='start'
                 >
                     {matchStatus !== MatchStatus.COMPLETE
-                        && inProgressSet.currentGame.server.name === player1.name && (
+                        && currentServer.name === player1.name && (
                             <ArrowLeftIcon fontSize='medium' />
                         )}
                 </Box>
@@ -124,9 +153,9 @@ export const MatchScore = () => {
                     display='flex' alignItems='center' justifyContent='start'
                 >
                     {matchStatus !== MatchStatus.COMPLETE
-                        && inProgressSet.currentGame.server.name === player2.name && (
-                        <ArrowLeftIcon fontSize='medium' />
-                    )}
+                        && currentServer.name === player2.name && (
+                            <ArrowLeftIcon fontSize='medium' />
+                        )}
                 </Box>
                 {matchStatus !== MatchStatus.COMPLETE && (
                     <>
