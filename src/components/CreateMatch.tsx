@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Autocomplete, Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
+import { Autocomplete, Box, Button, CircularProgress, Stack, TextField, Typography } from '@mui/material';
 import { useFormik } from 'formik'
 import { useMatchManager } from '../providers/matchManager';
 import * as Yup from 'yup';
@@ -32,7 +32,7 @@ type CountryOption = {
 }
 
 export const CreateMatch = () => {
-    const { matchType, handleInitMatch } = useMatchManager()
+    const { matchType, handleInitMatch, handleCloseMatch } = useMatchManager()
 
     const [countries, setCountries] = useState<CountryOption[] | null>(null)
     const getCountries = async () => {
@@ -99,18 +99,18 @@ export const CreateMatch = () => {
                     onSubmit={formik.handleSubmit}
                     style={{ width: '100%' }}
                 >
-                    <Box sx={{
-                        mt: 2,
-                        width: '100%',
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-around',
-                        alignItems: 'center'
-                    }}>
+                    <Stack
+                        width='100%'
+                        direction={{ xs: 'column', sm: 'row' }}
+                        display='flex'
+                        justifyContent='space-around'
+                        alignItems='center'
+                    >
 
                         <Box sx={{
                             display: 'flex',
-                            flexDirection: 'column'
+                            flexDirection: 'column',
+                            mt: 2
                         }}>
                             <Typography variant='h6'>
                                 Player 1
@@ -164,7 +164,8 @@ export const CreateMatch = () => {
                         </Box>
                         <Box sx={{
                             display: 'flex',
-                            flexDirection: 'column'
+                            flexDirection: 'column',
+                            mt: 2
                         }}>
                             <Typography variant='h6'>
                                 Player 2
@@ -216,23 +217,35 @@ export const CreateMatch = () => {
                             />
                         </Box>
 
-                    </Box>
+                    </Stack>
 
                     <Box sx={{
                         width: '100%',
+                        mt: 2,
                         display: 'flex',
+                        flexDirection: 'column',
                         justifyContent: 'center',
+                        alignItems: 'center'
                     }}>
                         <LoadingButton
                             type="submit"
                             variant='contained'
                             size='large'
                             color='info'
-                            // loading={formik.isSubmitting}
-                            sx={{ m: 4, width: 200 }}
+                            loading={formik.isSubmitting}
+                            sx={{ mt: 2, width: 200 }}
                         >
                             Create
                         </LoadingButton>
+                        <Button
+                            variant='outlined'
+                            size='large'
+                            color='info'
+                            sx={{ mt: 2, width: 200 }}
+                            onClick={handleCloseMatch}
+                        >
+                            Cancel
+                        </Button>
                     </Box>
                 </form>
             ) : (
