@@ -89,7 +89,7 @@ export const MatchScore = () => {
 
             <Stack direction='row' width='100%' justifyContent='center'>
                 <Box
-                    bgcolor='primary.dark' width='25%'
+                    bgcolor='primary.dark' width='25%' minWidth={100}
                     display='flex' alignItems='center' justifyContent='center'
                 >
                     <Typography textAlign='center' variant='h6'>
@@ -97,7 +97,7 @@ export const MatchScore = () => {
                     </Typography>
                 </Box>
                 <Box
-                    bgcolor='primary.dark' width='3%'
+                    bgcolor='primary.dark' width='3%' minWidth={15}
                     display='flex' alignItems='center' justifyContent='start'
                 >
                     {matchStatus !== MatchStatus.COMPLETE
@@ -141,7 +141,7 @@ export const MatchScore = () => {
             </Stack>
             <Stack direction='row' width='100%' justifyContent='center'>
                 <Box
-                    bgcolor='primary.dark' width='25%'
+                    bgcolor='primary.dark' width='25%' minWidth={100}
                     display='flex' alignItems='center' justifyContent='center'
                 >
                     <Typography textAlign='center' variant='h6'>
@@ -149,7 +149,7 @@ export const MatchScore = () => {
                     </Typography>
                 </Box>
                 <Box
-                    bgcolor='primary.dark' width='3%'
+                    bgcolor='primary.dark' width='3%' minWidth={15}
                     display='flex' alignItems='center' justifyContent='start'
                 >
                     {matchStatus !== MatchStatus.COMPLETE
