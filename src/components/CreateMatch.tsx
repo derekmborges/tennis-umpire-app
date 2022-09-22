@@ -11,9 +11,10 @@ const playerSchema = Yup.object().shape({
     name: Yup.string()
         .min(2, 'Player name must be at least 2 characters')
         .required('Player name required'),
-    country: Yup.string()
+    countryAbbrev: Yup.string()
         .length(3, 'Must be 3-Letter country code')
         .required('Country required'),
+    countryFlag: Yup.string().required(),
     rank: Yup
         .number()
         .positive('Rank must be > 0')
@@ -28,7 +29,8 @@ const schema = Yup.object().shape({
 
 type CountryOption = {
     label: string,
-    value: string
+    flag: string,
+    abbrev: string
 }
 
 export const CreateMatch = () => {
@@ -39,7 +41,8 @@ export const CreateMatch = () => {
         const response = await axios.get('https://restcountries.com/v3.1/all')
         const countries: CountryOption[] = response.data.map((country: any) => ({
             label: `${country.flag} ${country.name.common}`,
-            value: country.cca3
+            abbrev: country.cca3,
+            flag: country.flag
         }))
         setCountries(countries)
     }
@@ -52,28 +55,32 @@ export const CreateMatch = () => {
         initialValues: {
             player1: {
                 name: '',
-                country: '',
+                countryAbbrev: '',
+                countryFlag: '',
                 rank: ''
             },
             player2: {
                 name: '',
-                country: '',
+                countryAbbrev: '',
+                countryFlag: '',
                 rank: ''
             }
         },
         onSubmit: values => {
             console.log('match details:', values);
-            
+
             const player1: Player = {
                 name: values.player1.name,
-                country: values.player1.country,
+                countryAbbrev: values.player1.countryAbbrev,
+                countryFlag: values.player1.countryFlag
             }
             if (values.player1.rank.length > 0) {
                 player1.rank = Number.parseInt(values.player1.rank)
             }
             const player2: Player = {
                 name: values.player2.name,
-                country: values.player2.country,
+                countryAbbrev: values.player2.countryAbbrev,
+                countryFlag: values.player2.countryFlag
             }
             if (values.player2.rank.length > 0) {
                 player2.rank = Number.parseInt(values.player2.rank)
@@ -134,8 +141,12 @@ export const CreateMatch = () => {
                                 getOptionLabel={option => option.label}
                                 onChange={(_, value) => {
                                     formik.setFieldValue(
-                                        "player1.country",
-                                        value?.value || ''
+                                        "player1.countryAbbrev",
+                                        value?.abbrev || ''
+                                    )
+                                    formik.setFieldValue(
+                                        "player1.countryFlag",
+                                        value?.flag || ''
                                     )
                                 }}
                                 renderInput={(params) => <TextField
@@ -143,8 +154,8 @@ export const CreateMatch = () => {
                                     name="player1.country"
                                     label="Country"
                                     variant='filled'
-                                    error={formik.touched.player1?.country && Boolean(formik.errors.player1?.country)}
-                                    helperText={formik.touched.player1?.country && formik.errors.player1?.country}
+                                    error={formik.touched.player1?.countryAbbrev && Boolean(formik.errors.player1?.countryAbbrev)}
+                                    helperText={formik.touched.player1?.countryAbbrev && formik.errors.player1?.countryAbbrev}
                                     sx={{ mt: 2 }}
                                 />}
                             />
@@ -189,8 +200,12 @@ export const CreateMatch = () => {
                                 getOptionLabel={option => option.label}
                                 onChange={(_, value) => {
                                     formik.setFieldValue(
-                                        "player2.country",
-                                        value?.value || ''
+                                        "player2.countryAbbrev",
+                                        value?.abbrev || ''
+                                    )
+                                    formik.setFieldValue(
+                                        "player2.countryFlag",
+                                        value?.flag || ''
                                     )
                                 }}
                                 renderInput={(params) => <TextField
@@ -198,8 +213,8 @@ export const CreateMatch = () => {
                                     name="player2.country"
                                     label="Country"
                                     variant='filled'
-                                    error={formik.touched.player2?.country && Boolean(formik.errors.player2?.country)}
-                                    helperText={formik.touched.player2?.country && formik.errors.player2?.country}
+                                    error={formik.touched.player2?.countryAbbrev && Boolean(formik.errors.player2?.countryAbbrev)}
+                                    helperText={formik.touched.player2?.countryAbbrev && formik.errors.player2?.countryAbbrev}
                                     sx={{ mt: 2 }}
                                 />}
                             />

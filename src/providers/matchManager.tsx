@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { checkForGameWin, checkForMatchWin, checkForSetWin, checkForTiebreaker, checkForTiebreakSetWin } from "../lib/scoring";
+import { checkForGameWin, checkForMatchWin, checkForSetPoint, checkForSetWin, checkForTiebreaker, checkForTiebreakSetWin } from "../lib/scoring";
 import { Game, MatchStatus, MatchType, Player, Set } from "../lib/types";
 
 interface MatchManagerContextT {
@@ -11,6 +11,11 @@ interface MatchManagerContextT {
     inProgressSet: Set | null
     completedSets: Set[] | null
     matchTimerLabel: string | null
+
+    currentSetPoint: Player | null
+    currentMatchPoint: Player | null
+    pastSetPoints: Player[] | null
+    pastMatchPoints: Player[] | null
     handleNewMatch: (type: MatchType) => void
     handleInitMatch: (player1: Player, player2: Player) => void
     handleStartMatch: () => void
@@ -33,6 +38,12 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
     const [player2, setPlayer2] = useState<Player | null>(null);
     const [inProgressSet, setInProgressSet] = useState<Set | null>(null);
     const [completedSets, setCompletedSets] = useState<Set[] | null>(null);
+
+    // Important points
+    const [currentSetPoint, setCurrentSetPoint] = useState<Player | null>(null);
+    const [pastSetPoints, setPastSetPoints] = useState<Player[] | null>(null);
+    const [currentMatchPoint, setCurrentMatchPoint] = useState<Player | null>(null);
+    const [pastMatchPoints, setPastMatchPoints] = useState<Player[] | null>(null);
 
     // Match Timer
     const [minutesPlayed, setMinutesPlayed] = useState<number>(0);
@@ -72,8 +83,13 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         setPlayer1(player1)
         setPlayer2(player2)
         setCompletedSets([])
-        setMinutesPlayed(0);
+        setMinutesPlayed(0)
         setMatchTimerLabel('00:00')
+
+        setCurrentSetPoint(null)
+        setCurrentMatchPoint(null)
+        setPastSetPoints([])
+        setPastMatchPoints([])
 
         createNewSet(player1, player2)
         setMatchStatus(MatchStatus.PENDING_START)
@@ -112,7 +128,7 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
                 } else (
                     updatedSet.currentGame.player2Score++
                 )
-    
+
                 updatedSet = checkForGameWin(updatedSet, player1, player2)
                 updatedSet = checkForTiebreaker(updatedSet, player1, player2)
                 updatedSet = checkForSetWin(updatedSet, player1, player2)
@@ -134,8 +150,16 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
             if (updatedSet.winner && completedSets) {
                 setCompletedSets([...completedSets, updatedSet])
                 createNewSet(player1, player2, updatedSet)
+                setCurrentSetPoint(null)
             } else {
                 setInProgressSet({ ...updatedSet })
+
+                const setPointPlayer = checkForSetPoint(updatedSet, player1, player2)
+                if (setPointPlayer) {
+                    setCurrentSetPoint(setPointPlayer)
+                } else {
+                    setCurrentSetPoint(null)
+                }
             }
         }
     }
@@ -167,6 +191,10 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         inProgressSet,
         completedSets,
         matchTimerLabel,
+        currentSetPoint,
+        pastSetPoints,
+        currentMatchPoint,
+        pastMatchPoints,
         handleNewMatch,
         handleInitMatch,
         handleStartMatch,

@@ -1,8 +1,9 @@
-import { Box, Stack, Typography } from '@mui/material'
+import { Box, Collapse, createTheme, List, responsiveFontSizes, Stack, Typography } from '@mui/material'
 import React from 'react'
 import { GameScore, MatchStatus, Player, Set } from '../../lib/types'
 import { useMatchManager } from '../../providers/matchManager'
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft'
+import { CSSTransition, TransitionGroup } from 'react-transition-group'
 
 const gameScoreMap = new Map<number, string>([
     [GameScore.ZERO, '0'],
@@ -17,7 +18,8 @@ export const MatchScore = () => {
         player2,
         inProgressSet,
         completedSets,
-        matchStatus
+        matchStatus,
+        currentSetPoint
     } = useMatchManager()
     if (!player1 || !player2 || !inProgressSet || !completedSets) return null
 
@@ -74,28 +76,49 @@ export const MatchScore = () => {
     return (
         <Stack direction='column' spacing={0.1} width='100%' alignItems='center'>
 
-            {inProgressSet.tiebreak && (
-                <Stack direction='row' width='100%' justifyContent='center'>
-                    <Box width='22%'></Box>
-                    <Box width='7%' minWidth={50}
-                        display='flex' alignItems='center' justifyContent='center'
-                    >
+            <Stack direction='row' width='100%' justifyContent='center'>
+                <Box width='22%'>
+                    {currentSetPoint && (
+                        <Typography variant='caption'>
+                            Set Point
+                        </Typography>
+                    )}
+                </Box>
+                <Box width='7%' minWidth={50}
+                    display='flex' alignItems='center' justifyContent='center'
+                >
+                    {inProgressSet.tiebreak && (
                         <Typography textAlign='center' variant='caption'>
                             Tiebreak
                         </Typography>
-                    </Box>
-                </Stack>
-            )}
+                    )}
+                </Box>
+            </Stack>
 
             <Stack direction='row' width='100%' justifyContent='center'>
-                <Box
-                    bgcolor='primary.dark' width='25%' minWidth={100}
-                    display='flex' alignItems='center' justifyContent='center'
+                <Stack
+                    direction='row'
+                    width='20%' minWidth={100}
+                    bgcolor='primary.dark'
+                    alignItems='center'
                 >
-                    <Typography textAlign='center' variant='h6'>
+                    <Typography variant='h5' mr={1}>
+                        {player1.countryFlag}
+                    </Typography>
+                    <Typography variant='h6'>
                         {player1.name}
                     </Typography>
-                </Box>
+                    {player1.rank && (
+                        <Typography
+                            variant='caption'
+                            color='primary.light'
+                            ml={0.5}
+                            pb={1}
+                        >
+                            ({player1.rank})
+                        </Typography>
+                    )}
+                </Stack>
                 <Box
                     bgcolor='primary.dark' width='3%' minWidth={15}
                     display='flex' alignItems='center' justifyContent='start'
@@ -105,15 +128,31 @@ export const MatchScore = () => {
                             <ArrowLeftIcon fontSize='medium' />
                         )}
                 </Box>
+                <TransitionGroup style={{ display: 'flex', flexDirection: 'row' }}>
+                    {completedSets.map((set, i) => (
+                        <CSSTransition
+                            key={i}
+                            timeout={500}
+                            classNames='fade'
+                        >
+                            <Box key={i}
+                                bgcolor='primary.light' width='6%' minWidth={40}
+                                display='flex' alignItems='center' justifyContent='center'
+                                borderRight='1px solid' borderColor='rgba(0, 0, 0, 0.1)'
+                            >
+                                <Typography textAlign='center'
+                                    color='ButtonText'
+                                    fontSize={18} fontWeight={600}
+                                    sx={set.winner?.name !== player1.name ? { opacity: 0.4 } : {}}
+                                >
+                                    {getCompletedSetScore(set, player1)}
+                                </Typography>
+                            </Box>
+                        </CSSTransition>
+                    ))}
+                </TransitionGroup>
                 {matchStatus !== MatchStatus.COMPLETE && (
                     <>
-                        <Box bgcolor='secondary.main' width='7%' minWidth={50}
-                            display='flex' alignItems='center' justifyContent='center'
-                        >
-                            <Typography textAlign='center' fontSize={18} fontWeight={600}>
-                                {scoreLabels[0]}
-                            </Typography>
-                        </Box>
                         <Box bgcolor='primary.light' width='6%' minWidth={40}
                             display='flex' alignItems='center' justifyContent='center'
                         >
@@ -121,33 +160,40 @@ export const MatchScore = () => {
                                 {getCurrentSetScore(player1)}
                             </Typography>
                         </Box>
+                        <Box bgcolor='secondary.main' width='7%' minWidth={50}
+                            display='flex' alignItems='center' justifyContent='center'
+                        >
+                            <Typography textAlign='center' fontSize={18} fontWeight={600}>
+                                {scoreLabels[0]}
+                            </Typography>
+                        </Box>
                     </>
                 )}
-                {completedSets.map((set, i) => (
-                    <Box key={i}
-                        bgcolor='primary.light' width={'6%'} minWidth={40}
-                        display='flex' alignItems='center' justifyContent='center'
-                        borderLeft='1px solid' borderColor='rgba(0, 0, 0, 0.1)'
-                    >
-                        <Typography textAlign='center'
-                            color='ButtonText'
-                            fontSize={18} fontWeight={600}
-                            sx={set.winner?.name !== player1.name ? { opacity: 0.4 } : {}}
-                        >
-                            {getCompletedSetScore(set, player1)}
-                        </Typography>
-                    </Box>
-                ))}
             </Stack>
             <Stack direction='row' width='100%' justifyContent='center'>
-                <Box
-                    bgcolor='primary.dark' width='25%' minWidth={100}
-                    display='flex' alignItems='center' justifyContent='center'
+                <Stack
+                    direction='row'
+                    width='20%' minWidth={100}
+                    bgcolor='primary.dark'
+                    alignItems='center'
                 >
-                    <Typography textAlign='center' variant='h6'>
+                    <Typography variant='h5' mr={1}>
+                        {player2.countryFlag}
+                    </Typography>
+                    <Typography variant='h6'>
                         {player2.name}
                     </Typography>
-                </Box>
+                    {player2.rank && (
+                        <Typography
+                            variant='caption'
+                            color='primary.light'
+                            ml={0.5}
+                            pb={1}
+                        >
+                            ({player2.rank})
+                        </Typography>
+                    )}
+                </Stack>
                 <Box
                     bgcolor='primary.dark' width='3%' minWidth={15}
                     display='flex' alignItems='center' justifyContent='start'
@@ -157,15 +203,31 @@ export const MatchScore = () => {
                             <ArrowLeftIcon fontSize='medium' />
                         )}
                 </Box>
+                <TransitionGroup style={{ display: 'flex', flexDirection: 'row' }}>
+                    {completedSets.map((set, i) => (
+                        <CSSTransition
+                            key={i}
+                            timeout={500}
+                            classNames='fade'
+                        >
+                            <Box key={i}
+                                bgcolor='primary.light' width='6%' minWidth={40}
+                                display='flex' alignItems='center' justifyContent='center'
+                                borderRight='1px solid' borderColor='rgba(0, 0, 0, 0.1)'
+                            >
+                                <Typography textAlign='center'
+                                    color='ButtonText'
+                                    fontSize={18} fontWeight={600}
+                                    sx={set.winner?.name !== player2.name ? { opacity: 0.4 } : {}}
+                                >
+                                    {getCompletedSetScore(set, player2)}
+                                </Typography>
+                            </Box>
+                        </CSSTransition>
+                    ))}
+                </TransitionGroup>
                 {matchStatus !== MatchStatus.COMPLETE && (
                     <>
-                        <Box bgcolor='secondary.main' width='7%' minWidth={50}
-                            display='flex' alignItems='center' justifyContent='center'
-                        >
-                            <Typography textAlign='center' fontSize={18} fontWeight={600}>
-                                {scoreLabels[1]}
-                            </Typography>
-                        </Box>
                         <Box bgcolor='primary.light' width='6%' minWidth={40}
                             display='flex' alignItems='center' justifyContent='center'
                         >
@@ -173,23 +235,15 @@ export const MatchScore = () => {
                                 {getCurrentSetScore(player2)}
                             </Typography>
                         </Box>
+                        <Box bgcolor='secondary.main' width='7%' minWidth={50}
+                            display='flex' alignItems='center' justifyContent='center'
+                        >
+                            <Typography textAlign='center' fontSize={18} fontWeight={600}>
+                                {scoreLabels[1]}
+                            </Typography>
+                        </Box>
                     </>
                 )}
-                {completedSets.map((set, i) => (
-                    <Box key={i}
-                        bgcolor='primary.light' width={'6%'} minWidth={40}
-                        display='flex' alignItems='center' justifyContent='center'
-                        borderLeft='1px solid' borderColor='rgba(0, 0, 0, 0.1)'
-                    >
-                        <Typography textAlign='center'
-                            color='ButtonText'
-                            fontSize={18} fontWeight={600}
-                            sx={set.winner?.name !== player2.name ? { opacity: 0.4 } : {}}
-                        >
-                            {getCompletedSetScore(set, player2)}
-                        </Typography>
-                    </Box>
-                ))}
             </Stack>
 
         </Stack>

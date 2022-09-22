@@ -17,7 +17,8 @@ export enum MatchStatus {
 
 export interface Player {
     name: string
-    country: string
+    countryAbbrev: string
+    countryFlag: string
     rank?: number
 }
 
