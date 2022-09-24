@@ -19,7 +19,10 @@ export const MatchScore = () => {
         inProgressSet,
         completedSets,
         matchStatus,
-        currentSetPoint
+        currentSetPoint,
+        currentMatchPoint,
+        pastSetPoints,
+        pastMatchPoints
     } = useMatchManager()
     if (!player1 || !player2 || !inProgressSet || !completedSets) return null
 
@@ -73,19 +76,31 @@ export const MatchScore = () => {
         ? inProgressSet.tiebreak.currentServer
         : inProgressSet.currentGame.server
 
+    const numSetPoint = (currentSetPoint && pastSetPoints && pastSetPoints.length > 0)
+        ? pastSetPoints.length + 1
+        : null
+
+    const numMatchPoint = (currentMatchPoint && pastMatchPoints && pastMatchPoints.length > 0)
+        ? pastMatchPoints.length + 1
+        : null
+
     return (
         <Stack direction='column' spacing={0.1} width='100%' alignItems='center'>
 
-            <Stack direction='row' width='100%' justifyContent='center'>
-                <Box width='22%'>
-                    {currentSetPoint && (
-                        <Typography variant='caption'>
-                            Set Point
+            <Stack direction='row' width='100%' height={20} justifyContent='center'>
+                <Box width='22%' display='flex' alignItems='center'>
+                    {currentMatchPoint ? (
+                        <Typography variant='caption' color='secondary.main'>
+                            Match Point {numMatchPoint && `#${numMatchPoint}`}
                         </Typography>
-                    )}
+                    ) : currentSetPoint ? (
+                        <Typography variant='caption' color='secondary.main'>
+                            Set Point {numSetPoint && `#${numSetPoint}`}
+                        </Typography>
+                    ) : null}
                 </Box>
-                <Box width='7%' minWidth={50}
-                    display='flex' alignItems='center' justifyContent='center'
+                <Box width='24%' minWidth={50}
+                    display='flex' alignItems='center' justifyContent='end'
                 >
                     {inProgressSet.tiebreak && (
                         <Typography textAlign='center' variant='caption'>
@@ -102,7 +117,7 @@ export const MatchScore = () => {
                     bgcolor='primary.dark'
                     alignItems='center'
                 >
-                    <Typography variant='h5' mr={1}>
+                    <Typography variant='h5' mr={1} ml={0.2}>
                         {player1.countryFlag}
                     </Typography>
                     <Typography variant='h6'>
@@ -177,7 +192,7 @@ export const MatchScore = () => {
                     bgcolor='primary.dark'
                     alignItems='center'
                 >
-                    <Typography variant='h5' mr={1}>
+                    <Typography variant='h5' mr={1} ml={0.2}>
                         {player2.countryFlag}
                     </Typography>
                     <Typography variant='h6'>

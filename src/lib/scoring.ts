@@ -1,4 +1,4 @@
-import { GameScore, Game, Set, Player, MatchType, matchTypeWinningSetCount } from "./types"
+import { GameScore, Game, Set, Player, MatchType, matchTypeWinningSetCount, Tiebreak } from "./types"
 
 const getGameWinner = (game: Game, player1: Player, player2: Player): Player | undefined => {
     if (game.player1Score > GameScore.FOURTY && (game.player1Score - game.player2Score) >= 2) {
@@ -56,13 +56,23 @@ const getSetWinner = (completedGames: Game[], player1: Player, player2: Player):
     }
 }
 
+const getTiebreakWinner = (tiebreak: Tiebreak, player1: Player, player2: Player): Player | undefined => {
+    const player1Score = tiebreak.player1Score
+    const player2Score = tiebreak.player2Score
+    if (player1Score >= 7 && (player1Score - player2Score) >= 2) {
+        return player1
+    } else if (player2Score >= 7 && (player2Score - player1Score) >= 2) {
+        return player2
+    }
+}
+
 export const checkForSetPoint = (set: Set, player1: Player, player2: Player): Player | undefined => {
     // Only check if enough games have been played
-    if (!set.winner && set.completedGames.length >= 5) {
+    if (!set.winner && !set.tiebreak && set.completedGames.length >= 5) {
 
         // simulate player1 getting another point
         const player1Score = set.currentGame.player1Score + 1
-        const possibleGame1 = {...set.currentGame, player1Score }
+        const possibleGame1 = { ...set.currentGame, player1Score }
         const possibleWinner1 = getGameWinner(possibleGame1, player1, player2)
         if (possibleWinner1) {
             possibleGame1.winner = possibleWinner1
@@ -75,7 +85,7 @@ export const checkForSetPoint = (set: Set, player1: Player, player2: Player): Pl
 
         // simulate player2 getting another point
         const player2Score = set.currentGame.player2Score + 1
-        const possibleGame2 = {...set.currentGame, player2Score }
+        const possibleGame2 = { ...set.currentGame, player2Score }
         const possibleWinner2 = getGameWinner(possibleGame2, player1, player2)
         if (possibleWinner2) {
             possibleGame2.winner = possibleWinner2
@@ -84,6 +94,20 @@ export const checkForSetPoint = (set: Set, player1: Player, player2: Player): Pl
             if (possibleSetWinner2) {
                 return player2
             }
+        }
+    }
+    // Simulate tiebreak
+    else if (!set.winner && set.tiebreak) {
+        const player1Score = set.tiebreak.player1Score + 1
+        const possibleTiebreakWinner1 = getTiebreakWinner({...set.tiebreak, player1Score}, player1, player2)
+        if (possibleTiebreakWinner1) {
+            return player1
+        }
+
+        const player2Score = set.tiebreak.player1Score + 1
+        const possibleTiebreakWinner2 = getTiebreakWinner({...set.tiebreak, player2Score}, player1, player2)
+        if (possibleTiebreakWinner2) {
+            return player2
         }
     }
 }
@@ -101,24 +125,18 @@ export const checkForSetWin = (set: Set, player1: Player, player2: Player): Set 
 
 export const checkForTiebreakSetWin = (set: Set, player1: Player, player2: Player): Set => {
     if (set.tiebreak) {
-        const player1Score = set.tiebreak.player1Score
-        const player2Score = set.tiebreak.player2Score
-        if (player1Score >= 7 && (player1Score - player2Score) >= 2) {
+        const tiebreakWinner = getTiebreakWinner(set.tiebreak, player1, player2)
+        if (tiebreakWinner) {
             return {
                 ...set,
-                winner: player1
-            }
-        } else if (player2Score >= 7 && (player2Score - player1Score) >= 2) {
-            return {
-                ...set,
-                winner: player2
+                winner: tiebreakWinner
             }
         }
     }
     return set
 }
 
-export const checkForMatchWin = (completedSets: Set[], matchType: MatchType, player1: Player, player2: Player): Player | undefined => {
+export const getMatchWinner = (completedSets: Set[], matchType: MatchType, player1: Player, player2: Player): Player | undefined => {
     const setsRequired = matchTypeWinningSetCount.get(matchType)
     if (setsRequired) {
         const player1Sets = completedSets.filter(s => s.winner?.name === player1.name).length
@@ -129,4 +147,24 @@ export const checkForMatchWin = (completedSets: Set[], matchType: MatchType, pla
             return player2
         }
     }
+}
+
+export const checkForMatchWin = (completedSets: Set[], matchType: MatchType, player1: Player, player2: Player): Player | undefined => {
+    return getMatchWinner(completedSets, matchType, player1, player2)
+}
+
+export const checkForMatchPoint = (
+    set: Set,
+    simulatedSetWinner: Player,
+    completedSets: Set[],
+    matchType: MatchType,
+    player1: Player,
+    player2: Player
+    ): Player | undefined => {
+    return getMatchWinner(
+        [...completedSets, { ...set, winner: simulatedSetWinner }],
+        matchType,
+        player1,
+        player2
+    )
 }
