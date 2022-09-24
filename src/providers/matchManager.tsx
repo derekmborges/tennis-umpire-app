@@ -22,6 +22,7 @@ interface MatchManagerContextT {
     handlePoint: (to: Player) => void
     handleEndMatch: () => void
     handleCloseMatch: () => void
+    handleRematch: () => void
 }
 
 export const MatchManagerContext = createContext<MatchManagerContextT>(null!)
@@ -214,6 +215,16 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         setPastMatchPoints(null)
     }
 
+    const handleRematch = () => {
+        if (matchType && player1 && player2) {
+            const type = matchType
+            const p1 = player1
+            const p2 = player2
+            handleNewMatch(type)
+            handleInitMatch(p1, p2)
+        }
+    }
+
     const contextValue: MatchManagerContextT = {
         matchStatus,
         matchType,
@@ -232,7 +243,8 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         handleStartMatch,
         handlePoint,
         handleEndMatch,
-        handleCloseMatch
+        handleCloseMatch,
+        handleRematch
     }
 
     return (

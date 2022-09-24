@@ -6,7 +6,8 @@ import { MatchScore } from './MatchManager/MatchScore'
 export const MatchResult = () => {
   const {
     matchWinner,
-    handleCloseMatch
+    handleCloseMatch,
+    handleRematch
   } = useMatchManager()
 
   return (
@@ -34,6 +35,7 @@ export const MatchResult = () => {
       <Button
         size='large' variant='outlined'
         sx={{ width: 300, mb: 1 }}
+        onClick={handleRematch}
       >
         Rematch
       </Button>
