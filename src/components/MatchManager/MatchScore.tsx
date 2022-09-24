@@ -1,4 +1,4 @@
-import { Box, Collapse, createTheme, List, responsiveFontSizes, Stack, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import React from 'react'
 import { GameScore, MatchStatus, Player, Set } from '../../lib/types'
 import { useMatchManager } from '../../providers/matchManager'

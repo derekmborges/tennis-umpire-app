@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { checkForGameWin, checkForMatchPoint, checkForMatchWin, checkForSetPoint, checkForSetWin, checkForTiebreaker, checkForTiebreakSetWin } from "../lib/scoring";
-import { Game, MatchStatus, MatchType, Player, Set } from "../lib/types";
+import { MatchStatus, MatchType, Player, Set } from "../lib/types";
 
 interface MatchManagerContextT {
     matchStatus: MatchStatus | null
