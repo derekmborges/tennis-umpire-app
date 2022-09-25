@@ -104,7 +104,7 @@ export const checkForSetPoint = (set: Set, player1: Player, player2: Player): Pl
             return player1
         }
 
-        const player2Score = set.tiebreak.player1Score + 1
+        const player2Score = set.tiebreak.player2Score + 1
         const possibleTiebreakWinner2 = getTiebreakWinner({...set.tiebreak, player2Score}, player1, player2)
         if (possibleTiebreakWinner2) {
             return player2

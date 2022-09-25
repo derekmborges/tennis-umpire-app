@@ -88,26 +88,38 @@ export const MatchScore = () => {
         <Stack direction='column' spacing={0.1} width='100%' alignItems='center'>
 
             <Stack direction='row' width='100%' height={20} justifyContent='center'>
-                <Box width='22%' display='flex' alignItems='center'>
+                <Stack
+                    direction='row' alignItems='flex-start'
+                    width='20%' minWidth={100}
+                >
                     {currentMatchPoint ? (
-                        <Typography variant='caption' color='secondary.main'>
+                        <Typography variant='caption' fontWeight={600} color='warning.main' pl={1}>
                             Match Point {numMatchPoint && `#${numMatchPoint}`}
                         </Typography>
                     ) : currentSetPoint ? (
-                        <Typography variant='caption' color='secondary.main'>
+                        <Typography variant='caption' fontWeight={600} color='primary.dark' pl={1}>
                             Set Point {numSetPoint && `#${numSetPoint}`}
                         </Typography>
                     ) : null}
-                </Box>
-                <Box width='24%' minWidth={50}
-                    display='flex' alignItems='center' justifyContent='end'
-                >
-                    {inProgressSet.tiebreak && (
-                        <Typography textAlign='center' variant='caption'>
-                            Tiebreak
-                        </Typography>
-                    )}
-                </Box>
+                </Stack>
+                <Box width='3%' minWidth={15}></Box>
+                {completedSets.map((_, i) => (
+                    <Box key={i} width='6%' minWidth={40}></Box>
+                ))}
+                {matchStatus !== MatchStatus.COMPLETE && (
+                    <>
+                        <Box width='6%' minWidth={40}></Box>
+                        <Box width='7%' minWidth={50}
+                            display='flex' alignItems='center' justifyContent='center'
+                        >
+                            {inProgressSet.tiebreak && (
+                                <Typography textAlign='center' variant='caption'>
+                                    Tiebreak
+                                </Typography>
+                            )}
+                        </Box>
+                    </>
+                )}
             </Stack>
 
             <Stack direction='row' width='100%' justifyContent='center'>

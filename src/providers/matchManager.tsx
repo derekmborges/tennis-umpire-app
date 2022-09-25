@@ -181,11 +181,14 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
                     )
                     if (matchPointPlayer) {
                         setCurrentMatchPoint(matchPointPlayer)
+                        setCurrentSetPoint(null)
                     } else {
                         setCurrentSetPoint(setPointPlayer)
+                        setCurrentMatchPoint(null)
                     }
                 } else {
                     setCurrentSetPoint(null)
+                    setCurrentMatchPoint(null)
                 }
             }
         }
