@@ -77,11 +77,11 @@ export const MatchScore = () => {
         : inProgressSet.currentGame.server
 
     const numSetPoint = (currentSetPoint && pastSetPoints && pastSetPoints.length > 0)
-        ? pastSetPoints.length + 1
+        ? pastSetPoints.filter(sp => sp.name === currentSetPoint.name).length + 1
         : null
 
     const numMatchPoint = (currentMatchPoint && pastMatchPoints && pastMatchPoints.length > 0)
-        ? pastMatchPoints.length + 1
+        ? pastMatchPoints.filter(mp => mp.name === currentMatchPoint.name).length + 1
         : null
 
     return (
