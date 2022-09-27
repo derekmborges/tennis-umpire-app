@@ -9,10 +9,10 @@ export const matchTypeWinningSetCount = new Map<MatchType, number>([
 ])
 
 export enum MatchStatus {
-    CREATING,
-    PENDING_START,
-    IN_PROGRESS,
-    COMPLETE
+    CREATING = 'Creating',
+    PENDING_START = 'Pending Start',
+    IN_PROGRESS = 'In Progress',
+    COMPLETE = 'Complete'
 }
 
 export interface Player {
@@ -46,5 +46,18 @@ export interface Set {
     currentGame: Game
     completedGames: Game[]
     tiebreak?: Tiebreak
+    winner?: Player
+}
+
+export interface Match {
+    id?: string
+    type: MatchType
+    status: MatchStatus
+    player1: Player
+    player2: Player
+    inProgressSet: Set
+    completedSets: Set[]
+    startTime?: Date
+    endTime?: Date
     winner?: Player
 }
