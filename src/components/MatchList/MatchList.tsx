@@ -26,7 +26,7 @@ import { DeleteMatchDialog } from './DeleteMatchDialog';
 export const MatchList = () => {
     const [selectingType, setSelectingType] = useState<boolean>(false)
     const { loading, matches, handleDelete } = useDatabase()
-    const { handleNewMatch } = useMatchManager()
+    const { handleNewMatch, handleLoadMatch } = useMatchManager()
 
     // Delete stuff
     const [matchToDelete, setMatchToDelete] = useState<Match | null>(null)
@@ -90,7 +90,9 @@ export const MatchList = () => {
                                         <TableCell align="center">
                                             <Box>
                                                 <Tooltip title='Resume'>
-                                                    <IconButton size='small' color='primary'>
+                                                    <IconButton size='small' color='primary'
+                                                        onClick={() => handleLoadMatch(match)}
+                                                    >
                                                         <PlayArrowRoundedIcon />
                                                     </IconButton>
                                                 </Tooltip>

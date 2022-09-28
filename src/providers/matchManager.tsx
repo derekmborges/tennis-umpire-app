@@ -24,6 +24,7 @@ interface MatchManagerContextT {
     handleEndMatch: () => void
     handleCloseMatch: () => void
     handleRematch: () => void
+    handleLoadMatch: (match: Match) => void
 }
 
 export const MatchManagerContext = createContext<MatchManagerContextT>(null!)
@@ -113,7 +114,7 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
             saveMatch()
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [matchStatus])
+    }, [matchStatus, inProgressSet, completedSets])
 
     const handleNewMatch = (type: MatchType) => {
         setMatchType(type)
@@ -286,6 +287,19 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         }
     }
 
+    const handleLoadMatch = (match: Match) => {
+        setMatchType(match.type)
+        setMatchStatus(match.status)
+        setPlayer1(match.player1)
+        setPlayer2(match.player2)
+        setInProgressSet(match.inProgressSet)
+        setCompletedSets(match.completedSets)
+
+        if (match.id) {
+            setDatabaseId(match.id)
+        }
+    }
+
     const contextValue: MatchManagerContextT = {
         matchStatus,
         matchType,
@@ -305,7 +319,8 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         handlePoint,
         handleEndMatch,
         handleCloseMatch,
-        handleRematch
+        handleRematch,
+        handleLoadMatch
     }
 
     return (
