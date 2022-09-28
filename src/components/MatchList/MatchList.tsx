@@ -4,6 +4,7 @@ import {
     CircularProgress,
     IconButton,
     Paper,
+    Snackbar,
     Table,
     TableBody,
     TableCell,
@@ -14,20 +15,33 @@ import {
     Typography
 } from '@mui/material'
 import React, { useState } from 'react'
-import { MatchType } from '../lib/types';
-import { useDatabase } from '../providers/databaseProvider';
-import { useMatchManager } from '../providers/matchManager'
-import { MatchTypeSelect } from './MatchTypeSelect';
+import { Match, MatchType } from '../../lib/types';
+import { useDatabase } from '../../providers/databaseProvider';
+import { useMatchManager } from '../../providers/matchManager'
+import { MatchTypeSelect } from '../MatchTypeSelect';
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
+import { DeleteMatchDialog } from './DeleteMatchDialog';
 
 export const MatchList = () => {
-    const [selectingType, setSelectingType] = useState<boolean>(false);
-    const { loading, matches } = useDatabase()
+    const [selectingType, setSelectingType] = useState<boolean>(false)
+    const { loading, matches, handleDelete } = useDatabase()
     const { handleNewMatch } = useMatchManager()
+
+    // Delete stuff
+    const [matchToDelete, setMatchToDelete] = useState<Match | null>(null)
+    const [deleteSuccess, setDeleteSuccess] = useState<boolean | null>(null)
 
     const newMatch = (type: MatchType) => {
         handleNewMatch(type)
+    }
+
+    const deleteMatch = () => {
+        if (matchToDelete) {
+            handleDelete(matchToDelete)
+            setMatchToDelete(null)
+            setDeleteSuccess(true)
+        }
     }
 
     return (
@@ -80,11 +94,15 @@ export const MatchList = () => {
                                                         <PlayArrowRoundedIcon />
                                                     </IconButton>
                                                 </Tooltip>
-                                                <Tooltip title='Delete'>
-                                                    <IconButton size='small' color='error'>
-                                                        <DeleteRoundedIcon />
-                                                    </IconButton>
-                                                </Tooltip>
+                                                {match.id !== undefined && (
+                                                    <Tooltip title='Delete'>
+                                                        <IconButton size='small' color='error'
+                                                            onClick={() => setMatchToDelete(match)}
+                                                        >
+                                                            <DeleteRoundedIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                )}
                                             </Box>
                                         </TableCell>
                                     </TableRow>
@@ -114,6 +132,23 @@ export const MatchList = () => {
                     />
                 )
             }
+
+            {matchToDelete && (
+                <DeleteMatchDialog
+                    match={matchToDelete}
+                    onCancel={() => setMatchToDelete(null)}
+                    onDelete={deleteMatch}
+                />
+            )}
+
+            {deleteSuccess && (
+                <Snackbar
+                    open
+                    autoHideDuration={5000}
+                    onClose={() => setDeleteSuccess(null)}
+                    message="Match deleted"
+                />
+            )}
         </>
     )
 }

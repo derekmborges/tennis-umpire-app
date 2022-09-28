@@ -262,6 +262,7 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
     }
 
     const handleCloseMatch = () => {
+        setDatabaseId(null)
         setMatchStatus(null)
         setMatchType(null)
         setMatchWinner(null)

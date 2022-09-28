@@ -9,10 +9,10 @@ export const matchTypeWinningSetCount = new Map<MatchType, number>([
 ])
 
 export enum MatchStatus {
-    CREATING = 'Creating',
-    PENDING_START = 'Pending Start',
-    IN_PROGRESS = 'In Progress',
-    COMPLETE = 'Complete'
+    CREATING,
+    PENDING_START,
+    IN_PROGRESS,
+    COMPLETE
 }
 
 export interface Player {

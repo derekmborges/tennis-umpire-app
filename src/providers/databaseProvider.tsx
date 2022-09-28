@@ -1,4 +1,4 @@
-import { addDoc, collection, getDocs, updateDoc, deleteDoc, doc, setDoc, Timestamp, QuerySnapshot, DocumentSnapshot, SnapshotOptions } from "firebase/firestore";
+import { addDoc, collection, getDocs, deleteDoc, doc, setDoc, Timestamp, DocumentSnapshot, SnapshotOptions } from "firebase/firestore";
 import { createContext, useContext, useEffect, useState } from "react";
 import { database } from "../firebase";
 import { Match } from "../lib/types";
@@ -73,11 +73,11 @@ export const DatabaseProvider: React.FC<ProviderProps> = ({ children }) => {
 
     useEffect(() => {
         getMatches()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const handleAdd = async (match: Match): Promise<Match> => {
         const docRef = await addDoc(matchesCollection, match)
-        console.log('match added with id', docRef.id)
         match.id = docRef.id
         await setDoc(docRef, match)
         return match
@@ -91,6 +91,7 @@ export const DatabaseProvider: React.FC<ProviderProps> = ({ children }) => {
     const handleDelete = async (match: Match) => {
         if (match.id) {
             await deleteDoc(doc(database, "matches", match.id))
+            getMatches()
         }
     }
 
