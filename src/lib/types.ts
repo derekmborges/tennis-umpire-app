@@ -48,3 +48,16 @@ export interface Set {
     tiebreak?: Tiebreak
     winner?: Player
 }
+
+export interface Match {
+    id?: string
+    type: MatchType
+    status: MatchStatus
+    player1: Player
+    player2: Player
+    inProgressSet: Set
+    completedSets: Set[]
+    startTime?: Date
+    endTime?: Date
+    winner?: Player
+}

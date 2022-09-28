@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { checkForGameWin, checkForMatchPoint, checkForMatchWin, checkForSetPoint, checkForSetWin, checkForTiebreaker, checkForTiebreakSetWin } from "../lib/scoring";
-import { MatchStatus, MatchType, Player, Set } from "../lib/types";
+import { Match, MatchStatus, MatchType, Player, Set } from "../lib/types";
+import { useDatabase } from "./databaseProvider";
 
 interface MatchManagerContextT {
     matchStatus: MatchStatus | null
@@ -23,6 +24,7 @@ interface MatchManagerContextT {
     handleEndMatch: () => void
     handleCloseMatch: () => void
     handleRematch: () => void
+    handleLoadMatch: (match: Match) => void
 }
 
 export const MatchManagerContext = createContext<MatchManagerContextT>(null!)
@@ -51,12 +53,68 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
     const [matchTimerInterval, setMatchTimerInterval] = useState<NodeJS.Timer | null>(null);
     const [matchTimerLabel, setMatchTimerLabel] = useState<string | null>(null);
 
+    // Database stuff
+    const [databaseId, setDatabaseId] = useState<string | null>(null)
+    const { handleAdd, handleUpdate } = useDatabase()
+
     useEffect(() => {
         if (matchTimerInterval) {
             console.log('timer updated:', minutesPlayed)
             setMatchTimerLabel(`00:${minutesPlayed.toString().padStart(2, '0')}`)
         }
     }, [minutesPlayed, matchTimerInterval])
+    
+    const saveMatch = async () => {
+        if (matchStatus && matchType && player1 && player2 && inProgressSet && completedSets
+        ) {
+            if (matchStatus === MatchStatus.PENDING_START) {
+                const match: Match = {
+                    type: matchType,
+                    status: matchStatus,
+                    player1,
+                    player2,
+                    inProgressSet,
+                    completedSets
+                }
+                const createdMatch = await handleAdd(match)
+                if (createdMatch.id) {
+                    setDatabaseId(createdMatch.id)
+                }
+            } else if (matchStatus === MatchStatus.IN_PROGRESS && databaseId) {
+                const matchUpdates: Match = {
+                    id: databaseId,
+                    type: matchType,
+                    status: matchStatus,
+                    player1,
+                    player2,
+                    inProgressSet,
+                    completedSets,
+                    startTime: new Date()
+                }
+                handleUpdate(matchUpdates)
+            } else if (matchStatus === MatchStatus.COMPLETE && matchWinner && databaseId) {
+                const matchUpdates: Match = {
+                    id: databaseId,
+                    type: matchType,
+                    status: matchStatus,
+                    player1,
+                    player2,
+                    inProgressSet,
+                    completedSets,
+                    winner: matchWinner,
+                    endTime: new Date()
+                }
+                handleUpdate(matchUpdates)
+            }
+        }
+    }
+
+    useEffect(() => {
+        if (matchStatus && [MatchStatus.PENDING_START, MatchStatus.IN_PROGRESS, MatchStatus.COMPLETE].includes(matchStatus)) {
+            saveMatch()
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [matchStatus, inProgressSet, completedSets])
 
     const handleNewMatch = (type: MatchType) => {
         setMatchType(type)
@@ -205,6 +263,7 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
     }
 
     const handleCloseMatch = () => {
+        setDatabaseId(null)
         setMatchStatus(null)
         setMatchType(null)
         setMatchWinner(null)
@@ -228,6 +287,19 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         }
     }
 
+    const handleLoadMatch = (match: Match) => {
+        setMatchType(match.type)
+        setMatchStatus(match.status)
+        setPlayer1(match.player1)
+        setPlayer2(match.player2)
+        setInProgressSet(match.inProgressSet)
+        setCompletedSets(match.completedSets)
+
+        if (match.id) {
+            setDatabaseId(match.id)
+        }
+    }
+
     const contextValue: MatchManagerContextT = {
         matchStatus,
         matchType,
@@ -247,7 +319,8 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         handlePoint,
         handleEndMatch,
         handleCloseMatch,
-        handleRematch
+        handleRematch,
+        handleLoadMatch
     }
 
     return (
