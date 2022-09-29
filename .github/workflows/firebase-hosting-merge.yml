@@ -11,22 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Create .env file
-        uses: ozaytsev86/create-env-file@v1
-        with:
-          ENV_REACT_APP_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-          ENV_REACT_APP_FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
-          ENV_REACT_APP_FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-          ENV_REACT_APP_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
-          ENV_REACT_APP_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
-          ENV_REACT_APP_FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
-          ENV_REACT_APP_FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
-          file_name: .env
-      - name: list files
-        run: ls -la
-      - name: Print env file
-        run: cat .env
-      - run: yarn && yarn build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
