@@ -23,7 +23,7 @@ jobs:
           ENV_FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
           file_name: .env
       - name: Print env file
-        run: cat .env.production.local
+        run: cat .env
       - run: yarn && yarn build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
