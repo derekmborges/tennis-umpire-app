@@ -8,13 +8,13 @@ import { getFirestore } from 'firebase/firestore';
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDe5tS7m2uexvppyx6m2M7JjTtVkTv_41g",
-  authDomain: "tennis-match-manager.firebaseapp.com",
-  projectId: "tennis-match-manager",
-  storageBucket: "tennis-match-manager.appspot.com",
-  messagingSenderId: "596956607701",
-  appId: "1:596956607701:web:3e7c6de1e6cdac62561e5c",
-  measurementId: "G-54QTPEQB09"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
