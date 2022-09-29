@@ -22,6 +22,8 @@ jobs:
           ENV_REACT_APP_FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
           ENV_REACT_APP_FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
           file_name: .env
+      - name: list files
+        run: ls -la
       - name: Print env file
         run: cat .env
       - run: yarn && yarn build
