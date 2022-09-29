@@ -11,17 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Make envfile
-        uses: SpicyPizza/create-envfile@v1.3
+      - name: Create .env file
+        uses: ozaytsev86/create-env-file@v1
         with:
-          envkey_FIREBASE_API_KEY: '${{ secrets.FIREBASE_API_KEY }}'
-          envkey_FIREBASE_AUTH_DOMAIN: '${{ secrets.FIREBASE_AUTH_DOMAIN }}'
-          envkey_FIREBASE_PROJECT_ID: '${{ secrets.FIREBASE_PROJECT_ID }}'
-          envkey_FIREBASE_STORAGE_BUCKET: '${{ secrets.FIREBASE_STORAGE_BUCKET }}'
-          envkey_FIREBASE_MESSAGING_SENDER_ID: '${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}'
-          envkey_FIREBASE_APP_ID: '${{ secrets.FIREBASE_APP_ID }}'
-          envkey_FIREBASE_MEASUREMENT_ID: '${{ secrets.FIREBASE_MEASUREMENT_ID }}'
-          file_name: .env.production.local
+          ENV_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          ENV_FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          ENV_FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          ENV_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          ENV_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          ENV_FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          ENV_FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
+          file_name: .env
       - name: Print env file
         run: cat .env.production.local
       - run: yarn && yarn build
