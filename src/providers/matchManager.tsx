@@ -67,7 +67,7 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
     const saveMatch = async () => {
         if (matchStatus && matchType && player1 && player2 && inProgressSet && completedSets
         ) {
-            if (matchStatus === MatchStatus.PENDING_START) {
+            if (matchStatus === MatchStatus.PENDING_START && !databaseId) {
                 const match: Match = {
                     type: matchType,
                     status: matchStatus,
@@ -80,7 +80,7 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
                 if (createdMatch.id) {
                     setDatabaseId(createdMatch.id)
                 }
-            } else if (matchStatus === MatchStatus.IN_PROGRESS && databaseId) {
+            } else if (databaseId) {
                 const matchUpdates: Match = {
                     id: databaseId,
                     type: matchType,
@@ -89,20 +89,8 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
                     player2,
                     inProgressSet,
                     completedSets,
-                    startTime: new Date()
-                }
-                handleUpdate(matchUpdates)
-            } else if (matchStatus === MatchStatus.COMPLETE && matchWinner && databaseId) {
-                const matchUpdates: Match = {
-                    id: databaseId,
-                    type: matchType,
-                    status: matchStatus,
-                    player1,
-                    player2,
-                    inProgressSet,
-                    completedSets,
-                    winner: matchWinner,
-                    endTime: new Date()
+                    ...(matchStatus === MatchStatus.IN_PROGRESS && {startTime: new Date()}),
+                    ...(matchStatus === MatchStatus.COMPLETE && {endTime: new Date()})
                 }
                 handleUpdate(matchUpdates)
             }

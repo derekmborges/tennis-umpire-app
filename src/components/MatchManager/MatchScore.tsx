@@ -84,6 +84,34 @@ export const MatchScore = () => {
         ? pastMatchPoints.filter(mp => mp.name === currentMatchPoint.name).length + 1
         : null
 
+    const CompletedSets = ({ player }: { player: Player }): JSX.Element => {
+        return (
+            <TransitionGroup style={{ display: 'flex', flexDirection: 'row', width: '4%', minWidth: 40 }}>
+                {completedSets.map((set, i) => (
+                    <CSSTransition
+                        key={i}
+                        timeout={500}
+                        classNames='fade'
+                    >
+                        <Box key={i}
+                            bgcolor='primary.light' width='100%'
+                            display='flex' alignItems='center' justifyContent='center'
+                            borderRight='1px solid' borderColor='rgba(0, 0, 0, 0.1)'
+                        >
+                            <Typography textAlign='center'
+                                color='ButtonText'
+                                fontSize={18} fontWeight={600}
+                                sx={set.winner?.name !== player.name ? { opacity: 0.4 } : {}}
+                            >
+                                {getCompletedSetScore(set, player)}
+                            </Typography>
+                        </Box>
+                    </CSSTransition>
+                ))}
+            </TransitionGroup>
+        )
+    }
+
     return (
         <Stack direction='column' spacing={0.1} width='100%' alignItems='center'>
 
@@ -104,7 +132,7 @@ export const MatchScore = () => {
                 </Stack>
                 <Box width='3%' minWidth={15}></Box>
                 {completedSets.map((_, i) => (
-                    <Box key={i} width='6%' minWidth={40}></Box>
+                    <Box key={i} width='4%' minWidth={40}></Box>
                 ))}
                 {matchStatus !== MatchStatus.COMPLETE && (
                     <>
@@ -155,29 +183,7 @@ export const MatchScore = () => {
                             <ArrowLeftIcon fontSize='medium' />
                         )}
                 </Box>
-                <TransitionGroup style={{ display: 'flex', flexDirection: 'row' }}>
-                    {completedSets.map((set, i) => (
-                        <CSSTransition
-                            key={i}
-                            timeout={500}
-                            classNames='fade'
-                        >
-                            <Box key={i}
-                                bgcolor='primary.light' width='6%' minWidth={40}
-                                display='flex' alignItems='center' justifyContent='center'
-                                borderRight='1px solid' borderColor='rgba(0, 0, 0, 0.1)'
-                            >
-                                <Typography textAlign='center'
-                                    color='ButtonText'
-                                    fontSize={18} fontWeight={600}
-                                    sx={set.winner?.name !== player1.name ? { opacity: 0.4 } : {}}
-                                >
-                                    {getCompletedSetScore(set, player1)}
-                                </Typography>
-                            </Box>
-                        </CSSTransition>
-                    ))}
-                </TransitionGroup>
+                <CompletedSets player={player1} />
                 {matchStatus !== MatchStatus.COMPLETE && (
                     <>
                         <Box bgcolor='primary.light' width='6%' minWidth={40}
@@ -230,29 +236,7 @@ export const MatchScore = () => {
                             <ArrowLeftIcon fontSize='medium' />
                         )}
                 </Box>
-                <TransitionGroup style={{ display: 'flex', flexDirection: 'row' }}>
-                    {completedSets.map((set, i) => (
-                        <CSSTransition
-                            key={i}
-                            timeout={500}
-                            classNames='fade'
-                        >
-                            <Box key={i}
-                                bgcolor='primary.light' width='6%' minWidth={40}
-                                display='flex' alignItems='center' justifyContent='center'
-                                borderRight='1px solid' borderColor='rgba(0, 0, 0, 0.1)'
-                            >
-                                <Typography textAlign='center'
-                                    color='ButtonText'
-                                    fontSize={18} fontWeight={600}
-                                    sx={set.winner?.name !== player2.name ? { opacity: 0.4 } : {}}
-                                >
-                                    {getCompletedSetScore(set, player2)}
-                                </Typography>
-                            </Box>
-                        </CSSTransition>
-                    ))}
-                </TransitionGroup>
+                <CompletedSets player={player2} />
                 {matchStatus !== MatchStatus.COMPLETE && (
                     <>
                         <Box bgcolor='primary.light' width='6%' minWidth={40}
