@@ -1,4 +1,4 @@
-import { addDoc, collection, getDocs, deleteDoc, doc, setDoc, Timestamp, DocumentSnapshot, SnapshotOptions, query, onSnapshot } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, setDoc, Timestamp, DocumentSnapshot, SnapshotOptions, query, onSnapshot } from "firebase/firestore";
 import { createContext, useContext, useEffect, useState } from "react";
 import { database } from "../firebase";
 import { Match } from "../lib/types";
