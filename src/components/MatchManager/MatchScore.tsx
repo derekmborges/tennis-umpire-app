@@ -86,7 +86,14 @@ export const MatchScore = () => {
 
     const CompletedSets = ({ player }: { player: Player }): JSX.Element => {
         return (
-            <TransitionGroup style={{ display: 'flex', flexDirection: 'row', width: '4%', minWidth: 40 }}>
+            <TransitionGroup style={{
+                display: 'flex',
+                flexDirection: 'row',
+                ...(completedSets.length > 0 && {
+                    width: '8%',
+                    minWidth: 40
+                })
+            }}>
                 {completedSets.map((set, i) => (
                     <CSSTransition
                         key={i}
@@ -109,6 +116,27 @@ export const MatchScore = () => {
                     </CSSTransition>
                 ))}
             </TransitionGroup>
+        )
+    }
+
+    const InProgressSet = ({ player }: { player: Player }): JSX.Element => {
+        return (
+            <>
+                <Box bgcolor='primary.light' width='5%' minWidth={40}
+                    display='flex' alignItems='center' justifyContent='center'
+                >
+                    <Typography textAlign='center' color='ButtonText' fontSize={18} fontWeight={600}>
+                        {getCurrentSetScore(player)}
+                    </Typography>
+                </Box>
+                <Box bgcolor='secondary.main' width='7%' minWidth={50}
+                    display='flex' alignItems='center' justifyContent='center'
+                >
+                    <Typography textAlign='center' fontSize={18} fontWeight={600}>
+                        {scoreLabels[0]}
+                    </Typography>
+                </Box>
+            </>
         )
     }
 
@@ -136,7 +164,7 @@ export const MatchScore = () => {
                 ))}
                 {matchStatus !== MatchStatus.COMPLETE && (
                     <>
-                        <Box width='6%' minWidth={40}></Box>
+                        <Box width='5%' minWidth={40}></Box>
                         <Box width='7%' minWidth={50}
                             display='flex' alignItems='center' justifyContent='center'
                         >
@@ -185,22 +213,7 @@ export const MatchScore = () => {
                 </Box>
                 <CompletedSets player={player1} />
                 {matchStatus !== MatchStatus.COMPLETE && (
-                    <>
-                        <Box bgcolor='primary.light' width='6%' minWidth={40}
-                            display='flex' alignItems='center' justifyContent='center'
-                        >
-                            <Typography textAlign='center' color='ButtonText' fontSize={18} fontWeight={600}>
-                                {getCurrentSetScore(player1)}
-                            </Typography>
-                        </Box>
-                        <Box bgcolor='secondary.main' width='7%' minWidth={50}
-                            display='flex' alignItems='center' justifyContent='center'
-                        >
-                            <Typography textAlign='center' fontSize={18} fontWeight={600}>
-                                {scoreLabels[0]}
-                            </Typography>
-                        </Box>
-                    </>
+                    <InProgressSet player={player1} />
                 )}
             </Stack>
             <Stack direction='row' width='100%' justifyContent='center'>
@@ -238,22 +251,7 @@ export const MatchScore = () => {
                 </Box>
                 <CompletedSets player={player2} />
                 {matchStatus !== MatchStatus.COMPLETE && (
-                    <>
-                        <Box bgcolor='primary.light' width='6%' minWidth={40}
-                            display='flex' alignItems='center' justifyContent='center'
-                        >
-                            <Typography textAlign='center' color='ButtonText' fontSize={18} fontWeight={600}>
-                                {getCurrentSetScore(player2)}
-                            </Typography>
-                        </Box>
-                        <Box bgcolor='secondary.main' width='7%' minWidth={50}
-                            display='flex' alignItems='center' justifyContent='center'
-                        >
-                            <Typography textAlign='center' fontSize={18} fontWeight={600}>
-                                {scoreLabels[1]}
-                            </Typography>
-                        </Box>
-                    </>
+                    <InProgressSet player={player2} />
                 )}
             </Stack>
 
