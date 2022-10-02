@@ -11,17 +11,26 @@ import {
     TableContainer,
     TableHead,
     TableRow,
+    Toolbar,
     Tooltip,
     Typography
 } from '@mui/material'
 import React, { useState } from 'react'
-import { Match, MatchType } from '../../lib/types';
+import { Match, MatchStatus, MatchType } from '../../lib/types';
 import { useDatabase } from '../../providers/databaseProvider';
 import { useMatchManager } from '../../providers/matchManager'
 import { MatchTypeSelect } from '../MatchTypeSelect';
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import { DeleteMatchDialog } from './DeleteMatchDialog';
+import SportsScoreIcon from '@mui/icons-material/SportsScore';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
+
+const statusLabelMap = new Map<MatchStatus, string>([
+    [MatchStatus.PENDING_START, "Pending Start"],
+    [MatchStatus.IN_PROGRESS, "In Progress"],
+    [MatchStatus.COMPLETE, "Complete"],
+])
 
 export const MatchList = () => {
     const [selectingType, setSelectingType] = useState<boolean>(false)
@@ -31,6 +40,9 @@ export const MatchList = () => {
     // Delete stuff
     const [matchToDelete, setMatchToDelete] = useState<Match | null>(null)
     const [deleteSuccess, setDeleteSuccess] = useState<boolean | null>(null)
+
+    const incompleteMatches = matches?.filter(match => match.winner === undefined)
+    const completeMatches = matches?.filter(match => match.winner !== undefined)
 
     const newMatch = (type: MatchType) => {
         handleNewMatch(type)
@@ -47,26 +59,39 @@ export const MatchList = () => {
     return (
         <>
             <Typography variant='h3' padding={2}>
-                Match List
+                Match Manager
             </Typography>
 
-            <Box width="100%"
-                display='flex'
-                justifyContent='flex-end'
-                m={1}
-            >
-                <Button
-                    variant='contained'
-                    color='secondary'
-                    onClick={() => setSelectingType(true)}
-                >
-                    New Match
-                </Button>
-            </Box>
+            {loading && (
+                <Box display='flex' justifyContent='center'>
+                    <CircularProgress />
+                </Box>
+            )}
 
-            {!loading && matches ? (
-                <>
-                    <TableContainer component={Paper}>
+            {!loading && incompleteMatches && (
+                <Paper sx={{ width: '100%', mt: 2, mb: 2 }}>
+                    <Toolbar sx={{
+                        pl: { sm: 2 },
+                        pr: { xs: 1, sm: 1 }
+                    }}>
+                        <Typography
+                            sx={{ flex: '1 1 100%' }}
+                            variant="h6"
+                            id="tableTitle"
+                            component="div"
+                        >
+                            Current Matches
+                        </Typography>
+                        <Tooltip title="New Match">
+                            <IconButton
+                                color='default'
+                                onClick={() => setSelectingType(true)}
+                            >
+                                <AddRoundedIcon />
+                            </IconButton>
+                        </Tooltip>
+                    </Toolbar>
+                    <TableContainer>
                         <Table aria-label="matches table">
                             <TableHead>
                                 <TableRow>
@@ -77,7 +102,7 @@ export const MatchList = () => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {matches.map((match) => (
+                                {incompleteMatches.map((match) => (
                                     <TableRow
                                         key={match.id}
                                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -86,7 +111,7 @@ export const MatchList = () => {
                                             {match.player1.name} v. {match.player2.name}
                                         </TableCell>
                                         <TableCell>{match.type}</TableCell>
-                                        <TableCell>{match.status}</TableCell>
+                                        <TableCell>{statusLabelMap.get(match.status)}</TableCell>
                                         <TableCell align="center">
                                             <Box>
                                                 <Tooltip title='Resume'>
@@ -112,18 +137,77 @@ export const MatchList = () => {
                             </TableBody>
                         </Table>
                     </TableContainer>
-                    {matches?.length === 0 && (
+                    {incompleteMatches?.length === 0 && (
                         <Typography variant='h5' p={2}>
                             No matches yet.
                         </Typography>
                     )}
-                </>
-            ) : (
-                <Box display='flex' justifyContent='center'>
-                    <CircularProgress />
-                </Box>
-            )
-            }
+                </Paper>
+            )}
+
+            {!loading && completeMatches && completeMatches.length > 0 && (
+                <Paper sx={{ width: '100%', mt: 2 }}>
+                    <Toolbar sx={{
+                        pl: { sm: 2 },
+                        pr: { xs: 1, sm: 1 }
+                    }}>
+                        <Typography
+                            sx={{ flex: '1 1 100%' }}
+                            variant="h6"
+                            id="tableTitle"
+                            component="div"
+                        >
+                            Completed Matches
+                        </Typography>
+                    </Toolbar>
+                    <TableContainer>
+                        <Table aria-label="matches table">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Matchup</TableCell>
+                                    <TableCell>Type</TableCell>
+                                    <TableCell>Status</TableCell>
+                                    <TableCell align="center">Actions</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {completeMatches.map((match) => (
+                                    <TableRow
+                                        key={match.id}
+                                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                    >
+                                        <TableCell component="th" scope="row">
+                                            {match.player1.name} v. {match.player2.name}
+                                        </TableCell>
+                                        <TableCell>{match.type}</TableCell>
+                                        <TableCell>{statusLabelMap.get(match.status)}</TableCell>
+                                        <TableCell align="center">
+                                            <Box>
+                                                <Tooltip title='Results'>
+                                                    <IconButton size='small' color='success'
+                                                        onClick={() => handleLoadMatch(match)}
+                                                    >
+                                                        <SportsScoreIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                {match.id !== undefined && (
+                                                    <Tooltip title='Delete'>
+                                                        <IconButton size='small' color='error'
+                                                            onClick={() => setMatchToDelete(match)}
+                                                        >
+                                                            <DeleteRoundedIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                )}
+                                            </Box>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Paper>
+            )}
 
 
             {

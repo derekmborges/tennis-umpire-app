@@ -89,6 +89,7 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
                     player2,
                     inProgressSet,
                     completedSets,
+                    ...(matchWinner && {winner: matchWinner}),
                     ...(matchStatus === MatchStatus.IN_PROGRESS && {startTime: new Date()}),
                     ...(matchStatus === MatchStatus.COMPLETE && {endTime: new Date()})
                 }
@@ -105,6 +106,7 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
     }, [matchStatus, inProgressSet, completedSets])
 
     const handleNewMatch = (type: MatchType) => {
+        setDatabaseId(null)
         setMatchType(type)
         setMatchStatus(MatchStatus.CREATING)
     }
