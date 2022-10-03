@@ -137,8 +137,8 @@ export const MatchList = () => {
                         </Table>
                     </TableContainer>
                     {incompleteMatches?.length === 0 && (
-                        <Typography variant='h5' p={2}>
-                            No matches yet.
+                        <Typography variant='h6' p={2} width='100%' textAlign='center'>
+                            No current matches
                         </Typography>
                     )}
                 </Paper>

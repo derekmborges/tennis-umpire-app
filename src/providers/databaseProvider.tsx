@@ -36,15 +36,15 @@ const matchConverter = {
         const data = snapshot.data(options);
         if (data) {
             return {
-                ...(data.id && { id: data.id }),
                 type: data.type,
                 status: data.status,
                 player1: data.player1,
                 player2: data.player2,
                 inProgressSet: data.inProgressSet,
                 completedSets: data.completedSets,
-                ...(data.startTime && { startTime: Date.parse(data.startTime) }),
-                ...(data.endTime && { endTime: Date.parse(data.endTime) }),
+                ...(data.id && { id: data.id }),
+                ...(data.startTime && { startTime: data.startTime.toDate() }),
+                ...(data.endTime && { endTime: data.endTime.toDate() }),
                 ...(data.winner && { winner: data.winner })
             } as Match
         }

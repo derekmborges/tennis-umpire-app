@@ -26,7 +26,8 @@ export const MatchScore = () => {
     } = useMatchManager()
     if (!player1 || !player2 || !inProgressSet || !completedSets) return null
 
-    const gameScoreLabels = (): string[] => {
+    const gameScoreLabelMap = (): Map<Player, string> => {
+        let scores: string[] = []
         if (!inProgressSet.tiebreak) {
             const player1Score = inProgressSet.currentGame.player1Score
             const player2Score = inProgressSet.currentGame.player2Score
@@ -35,25 +36,26 @@ export const MatchScore = () => {
             const regularScore1 = gameScoreMap.get(player1Score)
             const regularScore2 = gameScoreMap.get(player2Score)
             if (regularScore1 && regularScore2) {
-                return [regularScore1, regularScore2]
-            }
-
-            // Deuce scores
-            if (player1Score === player2Score) {
-                return ['40', '40']
+                scores = [regularScore1, regularScore2]
+            } else if (player1Score === player2Score) {
+                scores = ['40', '40']
             } else {
-                return player1Score > player2Score
+                scores = player1Score > player2Score
                     ? ['ADV', '']
                     : ['', 'ADV']
             }
         } else {
-            return [
+            scores = [
                 inProgressSet.tiebreak.player1Score.toString(),
                 inProgressSet.tiebreak.player2Score.toString()
             ]
         }
+        return new Map<Player, string>([
+            [player1, scores[0]],
+            [player2, scores[1]]
+        ])
     }
-    const scoreLabels = gameScoreLabels()
+    const scoreLabelMap = gameScoreLabelMap()
 
     const getCurrentSetScore = (player: Player): number => {
         return inProgressSet.completedGames
@@ -89,10 +91,6 @@ export const MatchScore = () => {
             <TransitionGroup style={{
                 display: 'flex',
                 flexDirection: 'row',
-                ...(completedSets.length > 0 && {
-                    width: '8%',
-                    minWidth: 40
-                })
             }}>
                 {completedSets.map((set, i) => (
                     <CSSTransition
@@ -101,7 +99,7 @@ export const MatchScore = () => {
                         classNames='fade'
                     >
                         <Box key={i}
-                            bgcolor='primary.light' width='100%'
+                            bgcolor='primary.light' width='3%' minWidth={40}
                             display='flex' alignItems='center' justifyContent='center'
                             borderRight='1px solid' borderColor='rgba(0, 0, 0, 0.1)'
                         >
@@ -133,7 +131,7 @@ export const MatchScore = () => {
                     display='flex' alignItems='center' justifyContent='center'
                 >
                     <Typography textAlign='center' fontSize={18} fontWeight={600}>
-                        {scoreLabels[0]}
+                        {scoreLabelMap.get(player)}
                     </Typography>
                 </Box>
             </>

@@ -1,4 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { getMinutesBetweenDates } from "../lib/helpers";
 import { checkForGameWin, checkForMatchPoint, checkForMatchWin, checkForSetPoint, checkForSetWin, checkForTiebreaker, checkForTiebreakSetWin } from "../lib/scoring";
 import { Match, MatchStatus, MatchType, Player, Set } from "../lib/types";
 import { useDatabase } from "./databaseProvider";
@@ -21,7 +23,6 @@ interface MatchManagerContextT {
     handleInitMatch: (player1: Player, player2: Player) => void
     handleStartMatch: () => void
     handlePoint: (to: Player) => void
-    handleEndMatch: () => void
     handleCloseMatch: () => void
     handleRematch: () => void
     handleLoadMatch: (match: Match) => void
@@ -49,21 +50,15 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
     const [pastMatchPoints, setPastMatchPoints] = useState<Player[] | null>(null);
 
     // Match Timer
-    const [minutesPlayed, setMinutesPlayed] = useState<number>(0);
-    const [matchTimerInterval, setMatchTimerInterval] = useState<NodeJS.Timer | null>(null);
+    const [matchTimerInterval, setMatchTimerInterval] = useState<NodeJS.Timer | undefined>();
+    const [matchStartTime, setMatchStartTime] = useState<Date | null>(null)
+    const [matchEndTime, setMatchEndTime] = useState<Date | null>(null)    
     const [matchTimerLabel, setMatchTimerLabel] = useState<string | null>(null);
 
     // Database stuff
     const [databaseId, setDatabaseId] = useState<string | null>(null)
     const { handleAdd, handleUpdate } = useDatabase()
 
-    useEffect(() => {
-        if (matchTimerInterval) {
-            console.log('timer updated:', minutesPlayed)
-            setMatchTimerLabel(`00:${minutesPlayed.toString().padStart(2, '0')}`)
-        }
-    }, [minutesPlayed, matchTimerInterval])
-    
     const saveMatch = async () => {
         if (matchStatus && matchType && player1 && player2 && inProgressSet && completedSets
         ) {
@@ -89,9 +84,9 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
                     player2,
                     inProgressSet,
                     completedSets,
+                    ...(matchStartTime && {startTime: matchStartTime}),
+                    ...(matchEndTime && {endTime: matchEndTime}),
                     ...(matchWinner && {winner: matchWinner}),
-                    ...(matchStatus === MatchStatus.IN_PROGRESS && {startTime: new Date()}),
-                    ...(matchStatus === MatchStatus.COMPLETE && {endTime: new Date()})
                 }
                 handleUpdate(matchUpdates)
             }
@@ -102,7 +97,6 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         if (matchStatus && [MatchStatus.PENDING_START, MatchStatus.IN_PROGRESS, MatchStatus.COMPLETE].includes(matchStatus)) {
             saveMatch()
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [matchStatus, inProgressSet, completedSets])
 
     const handleNewMatch = (type: MatchType) => {
@@ -132,7 +126,6 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         setPlayer1(player1)
         setPlayer2(player2)
         setCompletedSets([])
-        setMinutesPlayed(0)
         setMatchTimerLabel('00:00')
 
         setCurrentSetPoint(null)
@@ -144,25 +137,45 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         setMatchStatus(MatchStatus.PENDING_START)
     }
 
-    const incrementTimer = () => {
-        setMinutesPlayed(minutesPlayed + 1)
+    const updateTimer = () => {
+        if (matchStartTime) {
+            const minutes = getMinutesBetweenDates(matchStartTime, new Date())
+            const hours = Math.floor(minutes / 60)
+            const remainingMinutes = minutes % 60
+            setMatchTimerLabel(
+                `${hours.toString().padStart(2, '0')}:${remainingMinutes.toString().padStart(2, '0')}`
+            )
+        }
     }
 
-    const handleStartMatch = () => {
-        setMatchStatus(MatchStatus.IN_PROGRESS)
+    useEffect(() => {
+        if (matchStartTime && !matchEndTime) {
+            updateTimer()
+            const interval = setInterval(updateTimer, 60000)
+            setMatchTimerInterval(interval)
+            return () => clearInterval(interval)
+        } else {
+            clearInterval(matchTimerInterval)
+            setMatchTimerInterval(undefined)
+        }
+    }, [matchStartTime])
 
-        // Start timer
-        const interval = setInterval(incrementTimer, 60000)
-        setMatchTimerInterval(interval)
+    useEffect(() => {
+        if (matchEndTime) {
+            clearInterval(matchTimerInterval)
+        }
+    }, [matchEndTime])
+
+    const handleStartMatch = () => {
+        setMatchStartTime(new Date())
+        setMatchStatus(MatchStatus.IN_PROGRESS)
     }
 
     useEffect(() => {
         if (matchType && player1 && player2 && completedSets && completedSets.length > 1) {
             const winner = checkForMatchWin(completedSets, matchType, player1, player2)
             if (winner) {
-                setMatchWinner(winner)
-                setMatchStatus(MatchStatus.COMPLETE)
-                handleEndMatch()
+                handleEndMatch(winner)
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -242,12 +255,12 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         }
     }
 
-    const handleEndMatch = () => {
-        // Stop timer
-        if (matchTimerInterval) {
-            clearInterval(matchTimerInterval)
-            setMatchTimerInterval(null)
-        }
+    const handleEndMatch = (winner: Player) => {
+        setMatchWinner(winner)
+        setMatchStatus(MatchStatus.COMPLETE)
+        
+        setMatchEndTime(new Date())
+        
         setCurrentSetPoint(null)
         setCurrentMatchPoint(null)
     }
@@ -261,6 +274,11 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         setPlayer2(null)
         setInProgressSet(null)
         setCompletedSets(null)
+
+        setMatchTimerInterval(undefined)
+        setMatchStartTime(null)
+        setMatchEndTime(null)
+        
         setCurrentSetPoint(null)
         setPastSetPoints(null)
         setCurrentMatchPoint(null)
@@ -288,6 +306,15 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         if (match.id) {
             setDatabaseId(match.id)
         }
+        if (match.startTime) {
+            setMatchStartTime(match.startTime)
+        }
+        if (match.endTime) {
+            setMatchEndTime(match.endTime)
+        }
+        if (match.winner) {
+            setMatchWinner(match.winner)
+        }
     }
 
     const contextValue: MatchManagerContextT = {
@@ -307,7 +334,6 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
         handleInitMatch,
         handleStartMatch,
         handlePoint,
-        handleEndMatch,
         handleCloseMatch,
         handleRematch,
         handleLoadMatch

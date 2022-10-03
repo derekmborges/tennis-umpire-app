@@ -67,8 +67,6 @@ export const CreateMatch = () => {
             }
         },
         onSubmit: values => {
-            console.log('match details:', values);
-
             const player1: Player = {
                 name: values.player1.name,
                 countryAbbrev: values.player1.countryAbbrev,
