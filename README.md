@@ -1,10 +1,30 @@
-# Getting Started with Create React App
+# Tennis Match Manager
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A web application to help you manage a tennis match as a chair umpire. Built with React (TypeScript) and Google Firebase.
 
-## Available Scripts
+You can access the live deployment of this project below.
 
-In the project directory, you can run:
+## [Manager App](https://tennis-match-manager.web.app)
+
+# Development
+
+## Prerequisites
+
+You will need a `.env` file created at the root of the project with the following environment variables taken from the Firebase Console
+
+```
+REACT_APP_FIREBASE_API_KEY=<api-key>
+REACT_APP_FIREBASE_AUTH_DOMAIN=<auth-domain>
+REACT_APP_FIREBASE_PROJECT_ID=<project-id>
+REACT_APP_FIREBASE_STORAGE_BUCKET=<storage-bucket>
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=<messaging-sender-id>
+REACT_APP_FIREBASE_APP_ID=<app-id>
+REACT_APP_FIREBASE_MEASUREMENT_ID=<measurement-id>
+```
+
+## Commands
+
+Once you're finished setting up the project, you can run the below commands in the root project directory:
 
 ### `yarn start`
 
