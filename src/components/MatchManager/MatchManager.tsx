@@ -1,5 +1,5 @@
-import { Button, Typography } from '@mui/material'
-import React from 'react'
+import { Button, Snackbar, Typography } from '@mui/material'
+import React, { useState } from 'react'
 import { MatchStatus } from '../../lib/types'
 import { useMatchManager } from '../../providers/matchManager'
 import { CourtCard } from './CourtCard'
@@ -9,6 +9,12 @@ import { PointActions } from './PointActions'
 
 export const MatchManager = () => {
   const { matchStatus, handleStartMatch } = useMatchManager()
+  const [matchStarted, setMatchStarted] = useState<boolean | null>(null)
+
+  const startMatch = () => {
+    handleStartMatch()
+    setMatchStarted(true)
+  }
 
   return (
     <>
@@ -40,10 +46,19 @@ export const MatchManager = () => {
           variant='outlined'
           size='large'
           sx={{ m: 10 }}
-          onClick={handleStartMatch}
+          onClick={startMatch}
         >
           Start Match
         </Button>
+      )}
+
+      {matchStarted && (
+        <Snackbar
+          open
+          autoHideDuration={5000}
+          onClose={() => setMatchStarted(null)}
+          message="Match started"
+        />
       )}
 
     </>
