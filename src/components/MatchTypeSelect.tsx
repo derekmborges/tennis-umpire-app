@@ -1,6 +1,6 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Radio, RadioGroup } from '@mui/material'
 import React, { ChangeEvent, useState } from 'react'
-import { MatchType } from '../lib/types'
+import { MatchType } from '../lib/models/match'
 
 type Props = {
     onCancel: () => void;

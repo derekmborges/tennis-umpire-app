@@ -1,6 +1,6 @@
 import { Box, Stack, Typography } from '@mui/material'
 import React from 'react'
-import { GameScore, MatchStatus, Player, Set } from '../../lib/types'
+import { GameScore, MatchStatus, Player, Set } from '../../lib/models/match'
 import { useMatchManager } from '../../providers/matchManager'
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft'
 import { CSSTransition, TransitionGroup } from 'react-transition-group'

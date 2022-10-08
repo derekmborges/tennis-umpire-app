@@ -15,7 +15,7 @@ import {
     Typography
 } from '@mui/material'
 import React, { useState } from 'react'
-import { Match, MatchStatus, MatchType } from '../../lib/types';
+import { Match, MatchStatus, MatchType } from '../../lib/models/match';
 import { useDatabase } from '../../providers/databaseProvider';
 import { useMatchManager } from '../../providers/matchManager'
 import { MatchTypeSelect } from '../MatchTypeSelect';
@@ -24,6 +24,7 @@ import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import { DeleteMatchDialog } from './DeleteMatchDialog';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import { useAuth } from '../../providers/authProvider';
 
 const statusLabelMap = new Map<MatchStatus, string>([
     [MatchStatus.PENDING_START, "Pending Start"],
@@ -33,8 +34,9 @@ const statusLabelMap = new Map<MatchStatus, string>([
 
 export const MatchList = () => {
     const [selectingType, setSelectingType] = useState<boolean>(false)
-    const { loading, matches, handleDelete } = useDatabase()
-    const { handleNewMatch, handleLoadMatch } = useMatchManager()
+    const { user } = useAuth()
+    const { handleDeleteMatch } = useDatabase()
+    const { loadingMatches, matches, handleNewMatch, handleLoadMatch } = useMatchManager()
 
     // Delete stuff
     const [matchToDelete, setMatchToDelete] = useState<Match | null>(null)
@@ -49,7 +51,7 @@ export const MatchList = () => {
 
     const deleteMatch = () => {
         if (matchToDelete) {
-            handleDelete(matchToDelete)
+            handleDeleteMatch(user?.id || '', matchToDelete)
             setMatchToDelete(null)
             setDeleteSuccess(true)
         }
@@ -154,17 +156,13 @@ export const MatchList = () => {
 
     return (
         <>
-            <Typography variant='h3' padding={2}>
-                Match Manager
-            </Typography>
-
-            {loading && (
+            {loadingMatches && (
                 <Box display='flex' justifyContent='center'>
                     <CircularProgress />
                 </Box>
             )}
 
-            {!loading && incompleteMatches &&
+            {!loadingMatches && incompleteMatches &&
                 <MatchTable
                     addAction
                     matchList={incompleteMatches}
@@ -172,7 +170,7 @@ export const MatchList = () => {
                 />
             }
 
-            {!loading && completeMatches &&
+            {!loadingMatches && completeMatches &&
                 <MatchTable
                     matchList={completeMatches}
                     title='Complete Matches'

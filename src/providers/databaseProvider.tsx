@@ -1,14 +1,17 @@
-import { addDoc, collection, deleteDoc, doc, setDoc, Timestamp, DocumentSnapshot, SnapshotOptions, query, onSnapshot } from "firebase/firestore";
-import { createContext, useContext, useEffect, useState } from "react";
+import { User } from "firebase/auth";
+import { addDoc, collection, deleteDoc, doc, setDoc, getDoc } from "firebase/firestore";
+import { createContext, useContext } from "react";
 import { database } from "../firebase";
-import { Match } from "../lib/types";
+import { userConverter } from "../lib/converters";
+import { Match } from "../lib/models/match";
+import { AppUser } from "../lib/models/user";
 
 interface DatabaseProviderContextT {
-    loading: boolean
-    matches: Match[] | null
-    handleAdd: (match: Match) => Promise<Match>
-    handleUpdate: (match: Match) => void
-    handleDelete: (match: Match) => void
+    handleAddUser: (user: User, accessToken: string | null) => Promise<AppUser>
+    handleGetUser: (userId: string) => Promise<AppUser | undefined>
+    handleAddMatch: (userId: string, match: Match) => Promise<Match>
+    handleUpdateMatch: (userId: string, match: Match) => void
+    handleDeleteMatch: (userId: string, match: Match) => void
 }
 
 export const DatabaseProviderContext = createContext<DatabaseProviderContextT>(null!)
@@ -17,87 +20,54 @@ export interface ProviderProps {
     children: React.ReactNode
 }
 
-const matchConverter = {
-    toFirestore: (match: Match) => {
-        return {
-            ...(match.id && { id: match.id }),
-            type: match.type,
-            status: match.status,
-            player1: match.player1,
-            player2: match.player2,
-            inProgressSet: match.inProgressSet,
-            completedSets: match.completedSets,
-            ...(match.startTime && { startTime: Timestamp.fromDate(match.startTime) }),
-            ...(match.endTime && { endTime: Timestamp.fromDate(match.endTime) }),
-            ...(match.winner && { winner: match.winner }),
-        }
-    },
-    fromFirestore: (snapshot: DocumentSnapshot, options: SnapshotOptions) => {
-        const data = snapshot.data(options);
-        if (data) {
-            return {
-                type: data.type,
-                status: data.status,
-                player1: data.player1,
-                player2: data.player2,
-                inProgressSet: data.inProgressSet,
-                completedSets: data.completedSets,
-                ...(data.id && { id: data.id }),
-                ...(data.startTime && { startTime: data.startTime.toDate() }),
-                ...(data.endTime && { endTime: data.endTime.toDate() }),
-                ...(data.winner && { winner: data.winner })
-            } as Match
-        }
-    }
-}
+export const COLLECTION_USERS = 'Users'
+export const COLLECTION_MATCHES = 'Matches'
 
 export const DatabaseProvider: React.FC<ProviderProps> = ({ children }) => {
-    const [loading, setLoading] = useState<boolean>(false)
-    const [matches, setMatches] = useState<Match[] | null>(null)
 
-    const matchesCollection = collection(database, "matches").withConverter(matchConverter)
+    const handleGetUser = async (userId: string): Promise<AppUser | undefined> => {
+        const userDoc = await getDoc(doc(database, "Users", userId).withConverter(userConverter))
+        return userDoc.data()
+    }
 
-    useEffect(() => {
-        setLoading(true)
-        const unsubscribe = onSnapshot(query(matchesCollection), (querySnapshot) => {
-            const matches: Match[] = []
-            querySnapshot.forEach((doc) => {
-                const match = doc.data()
-                if (match) {
-                    matches.push(match)
-                }
-            });
-            setMatches(matches)
-            setLoading(false)
-        });
-        return unsubscribe
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    const handleAddUser = async (user: User, accessToken: string | null): Promise<AppUser> => {
+        const userDoc = doc(database, "Users", user.uid)
+        const appUser: AppUser = {
+            id: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            photoUrl: user.photoURL,
+            accessToken: accessToken
+        }
+        await setDoc(userDoc, appUser)
+        return appUser
+    }
 
-    const handleAdd = async (match: Match): Promise<Match> => {
-        const docRef = await addDoc(matchesCollection, match)
+    const handleAddMatch = async (userId: string, match: Match): Promise<Match> => {
+        const userMatchCollection = collection(database, COLLECTION_USERS, userId, COLLECTION_MATCHES)
+        const docRef = await addDoc(userMatchCollection, match)
         match.id = docRef.id
         await setDoc(docRef, match)
         return match
     }
-    const handleUpdate = async (match: Match) => {
+    const handleUpdateMatch = async (userId: string, match: Match) => {
         if (match.id) {
-            const matchRef = doc(database, "matches", match.id)
+            const matchRef = doc(database, COLLECTION_USERS, userId, COLLECTION_MATCHES, match.id)
             await setDoc(matchRef, match)
         }
     }
-    const handleDelete = async (match: Match) => {
+    const handleDeleteMatch = async (userId: string, match: Match) => {
         if (match.id) {
-            await deleteDoc(doc(database, "matches", match.id))
+            await deleteDoc(doc(database, COLLECTION_USERS, userId, COLLECTION_MATCHES, match.id))
         }
     }
 
     const contextValue: DatabaseProviderContextT = {
-        loading,
-        matches,
-        handleAdd,
-        handleUpdate,
-        handleDelete
+        handleAddUser,
+        handleGetUser,
+        handleAddMatch,
+        handleUpdateMatch,
+        handleDeleteMatch,
     }
 
     return (

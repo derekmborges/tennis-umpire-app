@@ -1,6 +1,6 @@
 import { Button, Snackbar, Typography } from '@mui/material'
 import React, { useState } from 'react'
-import { MatchStatus } from '../../lib/types'
+import { MatchStatus } from '../../lib/models/match'
 import { useMatchManager } from '../../providers/matchManager'
 import { CourtCard } from './CourtCard'
 import { MatchScore } from './MatchScore'
@@ -18,12 +18,7 @@ export const MatchManager = () => {
 
   return (
     <>
-      <Typography variant="h5" component="div" p={2}>
-        Match Manager
-      </Typography>
-
       <MatchTimer />
-
       <MatchScore />
 
       <Typography variant="h6" p={2}>

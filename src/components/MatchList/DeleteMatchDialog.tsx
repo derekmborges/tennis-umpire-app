@@ -1,6 +1,6 @@
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material'
 import React from 'react'
-import { Match } from '../../lib/types';
+import { Match } from '../../lib/models/match';
 
 type Props = {
     match: Match;
