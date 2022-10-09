@@ -2,10 +2,17 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { getMinutesBetweenDates } from "../lib/helpers";
 import { checkForGameWin, checkForMatchPoint, checkForMatchWin, checkForSetPoint, checkForSetWin, checkForTiebreaker, checkForTiebreakSetWin } from "../lib/scoring";
-import { Match, MatchStatus, MatchType, Player, Set } from "../lib/types";
-import { useDatabase } from "./databaseProvider";
+import { Match, MatchStatus, MatchType, Player, Set } from "../lib/models/match";
+import { COLLECTION_MATCHES, COLLECTION_USERS, useDatabase } from "./databaseProvider";
+import { useAuth } from "./authProvider";
+import { collection, onSnapshot, query } from "firebase/firestore";
+import { database } from "../firebase";
+import { matchConverter } from "../lib/converters";
 
 interface MatchManagerContextT {
+    loadingMatches: boolean
+    matches: Match[] | null
+
     matchStatus: MatchStatus | null
     matchType: MatchType | null
     matchWinner: Player | null
@@ -35,6 +42,11 @@ export interface ProviderProps {
 }
 
 export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
+    const { user } = useAuth()
+    const userId =  user?.id || ''
+    const [loadingMatches, setLoadingMatches] = useState<boolean>(false)
+    const [matches, setMatches] = useState<Match[] | null>(null)
+
     const [matchStatus, setMatchStatus] = useState<MatchStatus | null>(null);
     const [matchType, setMatchType] = useState<MatchType | null>(null);
     const [matchWinner, setMatchWinner] = useState<Player | null>(null);
@@ -57,7 +69,26 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
 
     // Database stuff
     const [databaseId, setDatabaseId] = useState<string | null>(null)
-    const { handleAdd, handleUpdate } = useDatabase()
+    const { handleAddMatch: handleAdd, handleUpdateMatch: handleUpdate } = useDatabase()
+
+    const matchesCollection = collection(database, COLLECTION_USERS, userId, COLLECTION_MATCHES).withConverter(matchConverter)
+
+    useEffect(() => {
+        setLoadingMatches(true)
+        const unsubscribe = onSnapshot(query(matchesCollection), (querySnapshot) => {
+            const matches: Match[] = []
+            querySnapshot.forEach((doc) => {
+                const match = doc.data()
+                if (match) {
+                    matches.push(match)
+                }
+            });
+            setMatches(matches)
+            setLoadingMatches(false)
+        });
+        return unsubscribe
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     const saveMatch = async () => {
         if (matchStatus && matchType && player1 && player2 && inProgressSet && completedSets
@@ -71,7 +102,7 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
                     inProgressSet,
                     completedSets
                 }
-                const createdMatch = await handleAdd(match)
+                const createdMatch = await handleAdd(userId, match)
                 if (createdMatch.id) {
                     setDatabaseId(createdMatch.id)
                 }
@@ -88,7 +119,7 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
                     ...(matchEndTime && {endTime: matchEndTime}),
                     ...(matchWinner && {winner: matchWinner}),
                 }
-                handleUpdate(matchUpdates)
+                handleUpdate(userId, matchUpdates)
             }
         }
     }
@@ -318,6 +349,8 @@ export const MatchManagerProvider: React.FC<ProviderProps> = ({ children }) => {
     }
 
     const contextValue: MatchManagerContextT = {
+        loadingMatches,
+        matches,
         matchStatus,
         matchType,
         matchWinner,

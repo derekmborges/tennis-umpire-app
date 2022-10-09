@@ -5,7 +5,7 @@ import { useMatchManager } from '../providers/matchManager';
 import * as Yup from 'yup';
 import { LoadingButton } from '@mui/lab';
 import axios from 'axios';
-import { Player } from '../lib/types';
+import { Player } from '../lib/models/match';
 
 const playerSchema = Yup.object().shape({
     name: Yup.string()

@@ -1,4 +1,4 @@
-import { GameScore, Game, Set, Player, MatchType, matchTypeWinningSetCount, Tiebreak } from "./types"
+import { GameScore, Game, Set, Player, MatchType, matchTypeWinningSetCount, Tiebreak } from "./models/match"
 
 const getGameWinner = (game: Game, player1: Player, player2: Player): Player | undefined => {
     if (game.player1Score > GameScore.FOURTY && (game.player1Score - game.player2Score) >= 2) {
