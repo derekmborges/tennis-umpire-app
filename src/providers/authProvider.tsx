@@ -1,5 +1,6 @@
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { getRedirectResult, GoogleAuthProvider, signInWithPopup, signInWithRedirect, UserCredential } from "firebase/auth";
 import { createContext, useContext, useEffect, useState } from "react";
+import { isMobile } from "react-device-detect";
 import { Login } from "../components/Login";
 import { auth } from "../firebase";
 import { AppUser } from "../lib/models/user";
@@ -26,6 +27,7 @@ export const AuthProvider: React.FC<ProviderProps> = ({ children }) => {
     const { handleAddUser, handleGetUser } = useDatabase()
 
     const loadUser = async () => {
+        if (user) return
         console.log(auth.currentUser)
         if (auth.currentUser) {
             const appUser = await handleGetUser(auth.currentUser.uid)
@@ -44,19 +46,27 @@ export const AuthProvider: React.FC<ProviderProps> = ({ children }) => {
     const handleLogin = async () => {
         setAuthenticating(true)
         try {
-            const result = await signInWithPopup(auth, provider)
-            const googleUser = result.user;
-            const credential = GoogleAuthProvider.credentialFromResult(result);
-            const token = credential?.accessToken || null;
-
-            const existingUser = await handleGetUser(googleUser.uid)
-            if (existingUser) {
-                console.log('user exists')
-                setUser(existingUser)
+            let result: UserCredential | null
+            if (isMobile) {
+                signInWithRedirect(auth, provider)
+                result = await getRedirectResult(auth)
             } else {
-                console.log('new user')
-                const user = await handleAddUser(googleUser, token)
-                setUser(user)
+                result = await signInWithPopup(auth, provider)
+            }
+            if (result) {
+                const googleUser = result.user;
+                const credential = GoogleAuthProvider.credentialFromResult(result);
+                const token = credential?.accessToken || null;
+    
+                const existingUser = await handleGetUser(googleUser.uid)
+                if (existingUser) {
+                    console.log('user exists')
+                    setUser(existingUser)
+                } else {
+                    console.log('new user')
+                    const user = await handleAddUser(googleUser, token)
+                    setUser(user)
+                }
             }
 
         } catch (error) {

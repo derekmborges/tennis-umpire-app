@@ -24,6 +24,7 @@ export const Login = () => {
                     mt: 8,
                     p: 2,
                     width: '50%',
+                    minWidth: 300,
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
