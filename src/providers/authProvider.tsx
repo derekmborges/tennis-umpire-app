@@ -1,4 +1,4 @@
-import { getRedirectResult, GoogleAuthProvider, signInWithPopup, signInWithRedirect, UserCredential } from "firebase/auth";
+import { getRedirectResult, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, User, UserCredential } from "firebase/auth";
 import { createContext, useContext, useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { Login } from "../components/Login";
@@ -26,58 +26,77 @@ export const AuthProvider: React.FC<ProviderProps> = ({ children }) => {
     const provider = new GoogleAuthProvider()
     const { handleAddUser, handleGetUser } = useDatabase()
 
-    const loadUser = async () => {
+    const loadUser = async (googleUser: User) => {
         if (user) return
-        console.log(auth.currentUser)
-        if (auth.currentUser) {
-            const appUser = await handleGetUser(auth.currentUser.uid)
-            console.log(appUser)
-            if (appUser) {
-                setUser(appUser)
+
+        const appUser = await handleGetUser(googleUser.uid)
+        if (appUser) {
+            setUser(appUser)
+        }
+    }
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged(changedUser => {
+            if (changedUser) {
+                loadUser(changedUser)
+            }
+        })
+        return unsubscribe
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    const handleLoginResult = async (result: UserCredential | null) => {
+        if (result) {
+            const googleUser = result.user;
+            const credential = GoogleAuthProvider.credentialFromResult(result);
+            const token = credential?.accessToken || null;
+
+            const existingUser = await handleGetUser(googleUser.uid)
+            if (existingUser) {
+                console.log('user exists')
+                setUser(existingUser)
+            } else {
+                console.log('new user')
+                const user = await handleAddUser(googleUser, token)
+                setUser(user)
             }
         }
     }
 
     useEffect(() => {
-        loadUser()
+        getRedirectResult(auth)
+            .then(async (result) => {
+                if (result) {
+                    setAuthenticating(true)
+                    await handleLoginResult(result)
+                    setAuthenticating(false)
+                }
+            })
+            .catch(function (error) {
+                console.error('Error authenticating user:', error)
+            });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, []);
 
     const handleLogin = async () => {
         setAuthenticating(true)
-        try {
-            let result: UserCredential | null
-            if (isMobile) {
-                signInWithRedirect(auth, provider)
-                result = await getRedirectResult(auth)
-            } else {
-                result = await signInWithPopup(auth, provider)
+        if (isMobile) {
+            signInWithRedirect(auth, provider)
+            return
+        } else {
+            try {
+                const result = await signInWithPopup(auth, provider)
+                await handleLoginResult(result)
+            } catch (error) {
+                console.error('Error authenticating user:', error)
             }
-            if (result) {
-                const googleUser = result.user;
-                const credential = GoogleAuthProvider.credentialFromResult(result);
-                const token = credential?.accessToken || null;
-    
-                const existingUser = await handleGetUser(googleUser.uid)
-                if (existingUser) {
-                    console.log('user exists')
-                    setUser(existingUser)
-                } else {
-                    console.log('new user')
-                    const user = await handleAddUser(googleUser, token)
-                    setUser(user)
-                }
-            }
-
-        } catch (error) {
-            console.error('Error authenticating user:', error)
         }
         setAuthenticating(false)
     }
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        await signOut(auth)
         setUser(null)
-        auth.updateCurrentUser(null)
     }
 
     const contextValue: AuthProviderContextT = {
