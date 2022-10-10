@@ -1,6 +1,9 @@
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![Firebase](https://img.shields.io/badge/Firebase-039BE5?style=for-the-badge&logo=Firebase&logoColor=white)
+
 # Tennis Match Manager
 
-A web application to help you manage a tennis match as a chair umpire. Built with React (TypeScript) and Google Firebase.
+A web application to help you manage a tennis match as a chair umpire.
 
 You can access the live deployment of this project below.
 
